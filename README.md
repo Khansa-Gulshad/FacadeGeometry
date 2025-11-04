@@ -13,7 +13,6 @@ Gdańsk, Poland/                 # segmentation output
   seg_full_vis                  # all classes (Cityscapes) segmented images
 NeurVPS scripts/                # code keep for reproducibility of NeurVPS
   prep_wflike.py                # JPG -> 512×512 PNG + split lists
-  make_su3_local.py             # NeurVPS's su3.yaml into a local YAML
   run_eval.py                   # wrapper to run NeurVPS eval.py and dump predictions
   vpt_postprocess.py            # 3D→2D VP transform (FOV, ordering, scaling)
 
@@ -44,9 +43,8 @@ modules/
   
 sihe/                           # SIHE model + configs used
   vps_models/
-    su3_ds.yaml                       # configuration (NeurVPS YAMLs that we used)
     neurvps_sihe_checkpoint.pth.tar   # SIHE retrained model
-    config.yaml                       # SIHE’s reference config
+    config.yaml                       # SIHE’s config file that we used
 ```
 
 
