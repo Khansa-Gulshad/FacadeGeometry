@@ -211,5 +211,32 @@ def segment_images(sam, images, city, index, save_streetview):
         os.path.join("/mnt/project/pt01183/facade_results", city, "seg_npz", f"{index}.npz"),
         seg=label
     )
+
+    # ==========================================
+    # SAVE VISUALIZATION PNG (for debugging)
+    # ==========================================
+
+    color_map = {
+        0: (0, 0, 0),          # background
+        1: (153, 102, 51),     # ground
+        2: (255, 255, 0),      # façade
+        3: (0, 0, 255),        # windows/doors
+        4: (0, 255, 255)       # sky
+        }
+
+    # Create visualization image
+    vis = np.zeros((label.shape[0], label.shape[1], 3), dtype=np.uint8)
+    for lbl, color in color_map.items():
+        vis[label == lbl] = color
+
+    # Save PNG
+    vis_path = os.path.join(
+        "/mnt/project/pt01183/facade_results",
+        city,
+        "seg_vis",
+        f"{index}.png"
+    )
+    Image.fromarray(vis).save(vis_path)
+    print(f"  ✓ Saved visualization PNG → {vis_path}")
   # Remove SV images to prevent duplicate predictions
   delete_files(temp_path)
