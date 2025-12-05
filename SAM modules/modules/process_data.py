@@ -167,7 +167,12 @@ def segment_images(sam, images, city, index, save_streetview):
 
   # Create segmentation masks based on the text prompts
   # Note: Should match with folder names defined in prepare_folders()
-  text_prompts = ["facades", "windows"]
+  text_prompts = [
+    "sky",
+    "building facade",
+    "windows doors openings",
+    "ground road pavement"
+    ]
 
   for prompt in text_prompts:
     out_dir = os.path.join("/mnt/project/pt01183/facade_results", city, f"temp_seg_{prompt}")
@@ -180,5 +185,31 @@ def segment_images(sam, images, city, index, save_streetview):
                       merge=False
                       )
 
+    # Build final label map from individual masks
+    H, W = Image.open(os.path.join(temp_path, f"{index}_streetview_0.tif")).size
+
+    label = np.zeros((W, H), dtype=np.uint8)
+
+    mask_dirs = {
+        4: "temp_seg_sky",
+        2: "temp_seg_facade",
+        3: "temp_seg_windows",
+        1: "temp_seg_ground"
+    }
+
+    for lbl, folder in mask_dirs.items():
+        folder_path = os.path.join("/mnt/project/pt01183/facade_results", city, folder)
+        mask_path = os.path.join(folder_path, f"{index}_streetview_0.tif")
+
+        if os.path.exists(mask_path):
+            mask_img = Image.open(mask_path).convert("L")
+            mask = np.array(mask_img) > 128
+            label[mask] = lbl
+
+    # Save to NPZ
+    np.savez(
+        os.path.join("/mnt/project/pt01183/facade_results", city, "seg_npz", f"{index}.npz"),
+        seg=label
+    )
   # Remove SV images to prevent duplicate predictions
   delete_files(temp_path)
