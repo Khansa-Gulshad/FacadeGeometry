@@ -15,40 +15,42 @@ from urllib.parse import urlparse
 # GitHub: https://github.com/Spatial-Data-Science-and-GEO-AI-Lab/StreetView-NatureVisibility-GSV
 # Prepare facade folders, create road network, and create features. 
 # Load pre-existing features instead of generating them
-def create_features(city, access_token, distance, num_sample_images, begin, end, save_roads_points, i=0,  bbox=None):
-    # Fallback to env var or default only if not provided
+def create_features(city, access_token, distance, num_sample_images, begin, end, save_roads_points, i=0, bbox=None):
     print(f"Creating features for city {city}")
 
-    # 1) Load buildings from OSM
+    # 1) Load buildings
     buildings = get_buildings(city, bbox)
 
     # 2) Generate façade sampling points
     features = get_facade_sampling_points(buildings, offset_m=8.0)
 
-    # Make it compatible with existing code expecting "road_angle"
+    # Make it compatible: use "road_angle" = direction we want to look at façade
     features["road_angle"] = features["facade_heading"]
-    
+
     # Mark none initially
     features["save_sample"] = False
 
-    # Random sampling
+    # Sampling
     limit = int(num_sample_images) if num_sample_images else len(features)
     limit = min(limit, len(features))
     pick = random.sample(list(features.index), limit)
     features.loc[pick, "save_sample"] = True
 
+    if 'id' not in features.columns:
+        features['id'] = range(len(features))
+
+    features = features.sort_values('id')
+
     if begin is not None and end is not None:
         features = features.iloc[begin:end]
 
-    # 5) Optional: save roads/points like your old flow
     if save_roads_points:
         outp = os.path.join("/mnt/project/pt01183/facade_results", city, "points")
         os.makedirs(outp, exist_ok=True)
         features.to_file(os.path.join(outp, f"points_{i}.gpkg"), driver="GPKG", layer=f"points_{i}")
 
     return features
-    # For each feature, calculates the facade greening potential score (GPS).
-    # Returns a list of GeoJSON features.
+
 
 # Function to validate the URL
 def is_valid_url(url):
@@ -70,27 +72,54 @@ def calculate_usable_wall_ratios(
     radius=15,
     pitch="25"
 ):
-    # base output root (consistent with your other paths)
     BASE_ROOT = "/mnt/project/pt01183/facade_results"
+    city_root = os.path.join(BASE_ROOT, city)
 
     usable_ratio = []
 
-    # temp output dirs where segment_images writes masks
-    facades_dir = os.path.join(BASE_ROOT, city, "temp_seg_facades")
-    windows_dir = os.path.join(BASE_ROOT, city, "temp_seg_windows")
-
-    # ensure folders exist (segment_images expects these)
+    # ensure folders exist
     from modules.process_data import prepare_folders
     prepare_folders(city)
 
+    seg_npz_dir = os.path.join(city_root, "seg_npz")
+
+    # ---------- helper: fetch one view aligned with facade ----------
+
+    def fetch_view(pano_id_, heading, key, radius_, fov="90", pitch_="25"):
+        import google_streetview.api, requests
+        from PIL import Image
+
+        params = [{
+            "size": "640x640",
+            "pano": pano_id_,
+            "heading": str(heading),
+            "pitch": pitch_,
+            "fov": fov,
+            "radius": str(radius_),
+            "key": key,
+        }]
+        res = google_streetview.api.results(params)
+        meta = res.metadata[0] if getattr(res, "metadata", None) else {}
+        if meta.get("status") not in (None, "OK"):
+            return None
+        url = res.links[0] if getattr(res, "links", None) else None
+        if not url:
+            return None
+        try:
+            return Image.open(
+                requests.get(url, stream=True, timeout=30).raw
+            ).convert("RGB")
+        except Exception:
+            return None
+
+    # ---------- MAIN LOOP ----------
     for index, row in features.iterrows():
-        # guard: only process marked samples (default True if column missing)
         if not row.get("save_sample", True):
             continue
 
         lat, lon = row.geometry.y, row.geometry.x
 
-        # normalize road_angle -> [0, 360)
+        # heading towards façade
         try:
             ra = float(row.get("road_angle", 0.0))
             if math.isnan(ra):
@@ -99,14 +128,14 @@ def calculate_usable_wall_ratios(
             ra = 0.0
         ra = (ra % 360 + 360) % 360
 
-        # ---------- 1) Discover pano near the point ----------
+        # 1) discover pano
         try:
             params0 = [{
                 "size": "640x640",
                 "location": f"{lat},{lon}",
                 "heading": "0",
                 "fov": "90",
-                "pitch": pitch,            # slight tilt up to reduce road
+                "pitch": pitch,
                 "radius": str(radius),
                 "key": access_token,
             }]
@@ -126,114 +155,55 @@ def calculate_usable_wall_ratios(
             print(f"[GSV] Failed pano discovery for idx {index}: {e}")
             continue
 
-        # ---------- 2) Fetch the two perpendicular views directly ----------
-        heading = ra
-        im = fetch_view(pano_id, heading, access_token, radius, fov="90", pitch_=pitch)
-
-        def fetch_view(pano_id_, heading, key, radius_, fov="90", pitch_="25"):
-            import google_streetview.api, requests
-            from PIL import Image
-            params = [{
-                "size": "640x640",
-                "pano": pano_id_,
-                "heading": str(heading),
-                "pitch": pitch_,
-                "fov": fov,
-                "radius": str(radius_),
-                "key": key,
-            }]
-            res = google_streetview.api.results(params)
-            meta = res.metadata[0] if getattr(res, "metadata", None) else {}
-            if meta.get("status") not in (None, "OK"):
-                return None
-            url = res.links[0] if getattr(res, "links", None) else None
-            if not url:
-                return None
-            try:
-                return Image.open(
-                    requests.get(url, stream=True, timeout=30).raw
-                ).convert("RGB")
-            except Exception:
-                return None
-        im = fetch_view(pano_id, heading, access_token, radius, fov="90", pitch_=pitch)
-
+        # 2) fetch façade view
+        im = fetch_view(pano_id, ra, access_token, radius, fov="90", pitch_=pitch)
         if im is None:
             print(f"[GSV] Could not fetch façade view for idx {index}")
             continue
 
-        # ---------- 3) Segment the two views ----------
-        segment_images(sam, images, city, index, save_streetview)
+        # optional: crop SVI
+        def crop_sv(img, crop_top=0.05, crop_bottom=0.30):
+            w, h = img.size
+            return img.crop((0, int(h * crop_top), w, int(h * (1 - crop_bottom))))
 
-        # ---------- 4) Read masks & compute ratios ----------
-        facades_segs, windows_segs = load_images(facades_dir, windows_dir)
-        widths, heights, ratios = [], [], []
+        im_c = crop_sv(im, 0.05, 0.30)
 
-        if (not facades_segs and not windows_segs) or (not facades_segs):
-            ratio = 0
-        elif not windows_segs:
-            ratio = 1
-        else:
-            if len(facades_segs) >= len(windows_segs):
-                for name in facades_segs:
-                    with Image.open(os.path.join(facades_dir, name)) as fseg:
-                        fcnt = count_white_pixels(fseg)
-                        w, h = fseg.size
-                    wcnt = 0
-                    wpath = os.path.join(windows_dir, name)
-                    if os.path.isfile(wpath):
-                        with Image.open(wpath) as wseg:
-                            wcnt = count_white_pixels(wseg)
-                    r = (fcnt - wcnt) / fcnt if fcnt > 0 else 0
-                    widths.append(w); heights.append(h); ratios.append(r)
-            else:
-                for name in windows_segs:
-                    with Image.open(os.path.join(windows_dir, name)) as wseg:
-                        wcnt = count_white_pixels(wseg)
-                        w, h = wseg.size
-                    fcnt = 0
-                    fpath = os.path.join(facades_dir, name)
-                    if os.path.isfile(fpath):
-                        with Image.open(fpath) as fseg:
-                            fcnt = count_white_pixels(fseg)
-                    r = (fcnt - wcnt) / fcnt if fcnt > 0 else 0
-                    widths.append(w); heights.append(h); ratios.append(r)
+        # 3) segment (this will create seg_npz/{index}.npz & seg_vis/{index}.png)
+        segment_images(sam, [im_c], city, index, save_streetview)
 
-        try:
-            rL, rR = ratios[0], ratios[1]
-            wL, wR = widths[0], widths[1]
-            hL, hR = heights[0], heights[1]
-            WAR = calculate_WAR(wL, hL, rL, wR, hR, rR)
-        except Exception:
-            rL, rR = (ratios[0], None) if ratios else (None, None)
-            WAR = ratios[0] if len(ratios) == 1 else 0
+        # 4) load label map and compute usable façade ratio
+        npz_path = os.path.join(seg_npz_dir, f"{index}.npz")
+        if not os.path.exists(npz_path):
+            print(f"[SAM] Missing NPZ for idx {index}")
+            continue
 
-        # ---------- 5) Move temp masks to final folders ----------
-        suffix = str(bbox_i)
-        facades_dst = os.path.join(BASE_ROOT, city, "seg_facades", suffix)
-        windows_dst = os.path.join(BASE_ROOT, city, "seg_windows", suffix)
-        os.makedirs(facades_dst, exist_ok=True)
-        os.makedirs(windows_dst, exist_ok=True)
-        move_files(facades_dir, facades_dst)
-        move_files(windows_dir, windows_dst)
+        seg = np.load(npz_path)["seg"]
 
-        # (Optional) record paths of saved streetview inputs (if you enabled save_streetview)
+        # labels: 1=ground, 2=facade, 3=windows/doors, 4=sky
+        fcnt = (seg == 2).sum()
+        wcnt = (seg == 3).sum()
+        ratio = (fcnt - wcnt) / fcnt if fcnt > 0 else 0.0
+
+        # For compatibility, treat this as WAR (one view only)
+        WAR = ratio
+        rL, rR = ratio, None
+
+        # 5) optionally attach SVI path
         image_paths = []
         if save_streetview:
-            sv_dir = os.path.join(BASE_ROOT, city, "sv_images")
-            # segment_images saves as f"{index}_streetview_0.tif" and "_1.tif"
-            for i_side in (0, 1):
-                pth = os.path.join(sv_dir, f"{index}_streetview_{i_side}.tif")
-                if os.path.isfile(pth):
-                    image_paths.append(pth)
+            sv_dir = os.path.join(city_root, "sv_images")
+            pth = os.path.join(sv_dir, f"{index}_streetview_0.tif")
+            if os.path.isfile(pth):
+                image_paths.append(pth)
 
-        # ---------- 6) Record feature ----------
+        # 6) record feature
         usable_ratio.append(Feature(
             geometry=row.geometry.__geo_interface__,
             properties={
                 "ratio_left": rL,
                 "ratio_right": rR,
                 "GPS": round(WAR, 2),
-                "image_paths": image_paths,   # list if saved, else []
+                "image_paths": image_paths,
                 "pano_id": pano_id,
                 "road_angle": ra,
                 "idx": int(index),
@@ -242,31 +212,21 @@ def calculate_usable_wall_ratios(
 
     return usable_ratio
 
+
 # Saves usable facade ratios (GPS) as a geopackage file
 def save_usable_wall_ratios(city, usable_ratios):
-    # Save points and ratios as GeoJSON FeatureCollection
-    features_file = f'{city}_features.gpkg'
+    features_file = f"{city}_features.gpkg"
     features_path = os.path.join("/mnt/project/pt01183/facade_results", city)
     feature_collection = FeatureCollection(usable_ratios)
 
-    # Convert it to a GeoDataFrame from the features
     gdf = gpd.GeoDataFrame.from_features(feature_collection["features"])
 
-    # Ensure the 'geometry' column is set
-    if 'geometry' not in gdf.columns:
+    if "geometry" not in gdf.columns:
         print("[ERROR] No geometry column found in the GeoDataFrame.")
         return
 
-    # Set the 'geometry' column as the active geometry column if not already set
-    gdf.set_geometry('geometry', inplace=True)
+    gdf.set_geometry("geometry", inplace=True)
+    gdf.set_crs("EPSG:4326", inplace=True)
 
-    # Ensure CRS is set correctly (WGS 84 - EPSG:4326)
-    gdf.set_crs('EPSG:4326', inplace=True)
-
-    # Save the GeoDataFrame to a GeoPackage
-    gdf.to_file(f'{features_path}/{features_file}', driver="GPKG")
-
-    print(f"Saved features to {features_file}")kage
-  gdf = gpd.GeoDataFrame.from_features(feature_collection["features"])
-  gdf.set_crs('EPSG:4326', inplace=True)
-  gdf.to_file(f'{features_path}/{features_file}', driver="GPKG")
+    gdf.to_file(f"{features_path}/{features_file}", driver="GPKG")
+    print(f"Saved features to {features_file}")
