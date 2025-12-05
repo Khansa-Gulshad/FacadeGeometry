@@ -2,7 +2,7 @@ import os
 import requests
 import shutil
 from PIL import Image, ImageFile
-
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # Creates required folder structure
 def prepare_folders(city):
@@ -22,7 +22,7 @@ def prepare_folders(city):
 
 # Creates a folder if it doesn't exist yet
 def prepare_folder(city, folder_name):
-  dir_path = os.path.join("results", city, folder_name)
+  dir_path = os.path.join("/mnt/project/pt01183/facade_results", city, folder_name)
   if not os.path.exists(dir_path):
       os.makedirs(dir_path)
 
@@ -31,25 +31,32 @@ def prepare_folder(city, folder_name):
 # GitHub: https://github.com/Spatial-Data-Science-and-GEO-AI-Lab/StreetView-NatureVisibility-GSV
 # Processes street view imagery (SVI) based on an image URL.
 # Returns a list of processed images (1 for normal SVI, 2 for panoramic SVI)
-def process_image(image_url, is_panoramic, road_angle):
-    # Fetch and process the image
-    image = Image.open(requests.get(image_url, stream=True).raw)
+def process_image(img_or_url, is_panoramic, road_angle):
+    """
+    Mapillary-style:
+    - Accept a URL *or* a PIL.Image
+    - If panoramic: crop bottom 20%, then extract the two perpendicular faces.
+    - If not: just return the single image.
+    """
+    # NEW: accept PIL image as well as URL
+    if isinstance(img_or_url, str):
+        image = Image.open(requests.get(img_or_url, stream=True).raw)
+    else:
+        image = img_or_url  # PIL.Image.Image
 
     if is_panoramic:
         width, height = image.size
-
-        # Crop out the bottom 20%
-        cropped_height = int(height*0.8)
+        # Mapillary logic: keep top 80% (crop out bottom 20%)
+        cropped_height = int(height * 0.8)
         image = image.crop((0, 0, width, cropped_height))
 
-        # Generate two images looking perpendicular from the road
+        # Split pano into two perpendicular faces using road_angle
         left_face, right_face = get_perpendicular_images(image, road_angle)
         images = [left_face, right_face]
     else:
         images = [image]
 
     return images
-
 # Takes a panoramic SVI and returns two images looking perpendicular from the road
 def get_perpendicular_images(image, road_angle):
     width, height = image.size
@@ -91,8 +98,17 @@ def delete_files(path):
 
 # Takes a TIF PIL image and returns the number of white pixels in it
 def count_white_pixels(image):
-  return sum(1 for pixel in image.getdata() if pixel == 255)
-
+  # change 1: robust white detection across modes (1/L/RGB/P)
+  im = image
+  if im.mode == "P":
+    im = im.convert("L")
+  if im.mode == "1":
+    return sum(1 for p in im.getdata() if p == 255)
+  elif im.mode == "L":
+    return sum(1 for p in im.getdata() if p >= 250)
+  else:
+    im = im.convert("RGB")
+    return sum(1 for r, g, b in im.getdata() if r >= 250 and g >= 250 and b >= 250)
 
 # Calculates weighted average ratio (WAR) of two perpendicular looking images
 def calculate_WAR(width_A, height_A, ratio_A, width_B, height_B, ratio_B):
@@ -134,8 +150,8 @@ def move_files(source_dir, destination_dir):
 def segment_images(sam, images, city, index, save_streetview):
   # Temporarily save images per batch, segment them, then remove original image
   # Also save a non-temporary copy for analysis purposes
-  temp_path = os.path.join("results", city, "temp_sv_images")
-  sv_path = os.path.join("results", city, "sv_images")
+  temp_path = os.path.join("/mnt/project/pt01183/facade_results", city, "temp_sv_images")
+  sv_path = os.path.join("/mnt/project/pt01183/facade_results", city, "sv_images")
 
   for i, image in enumerate(images):
     temp_output_path = os.path.join(temp_path, f"{index}_streetview_{i}.tif")
@@ -154,7 +170,7 @@ def segment_images(sam, images, city, index, save_streetview):
   text_prompts = ["facades", "windows"]
 
   for prompt in text_prompts:
-    out_dir = os.path.join("results", city, f"temp_seg_{prompt}")
+    out_dir = os.path.join("/mnt/project/pt01183/facade_results", city, f"temp_seg_{prompt}")
 
     sam.predict_batch(images=temp_path,
                       out_dir=out_dir,
