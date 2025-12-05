@@ -183,15 +183,15 @@ def segment_images(sam, images, city, index, save_streetview):
     # 1. Save SVI(s) temporarily
     # ---------------------------------------------------
     for i, image in enumerate(images):
-        temp_output_path = os.path.join(temp_path, f"{index}_streetview_{i}.tif")
+        temp_output_path = os.path.join(temp_path, f"{index}_streetview_{i}.png")
         image.save(temp_output_path)
 
         if save_streetview:
-            sv_output = os.path.join(sv_path, f"{index}_streetview_{i}.tif")
+            sv_output = os.path.join(sv_path, f"{index}_streetview_{i}.png")
             image.save(sv_output)
 
     # list images we just wrote
-    files = sorted([f for f in os.listdir(temp_path) if f.endswith(".tif")])
+    files = sorted([f for f in os.listdir(temp_path) if f.endswith(".png")])
     if not files:
         print(f"[SAM] No temp images for index {index}")
         return
@@ -238,7 +238,7 @@ def segment_images(sam, images, city, index, save_streetview):
 
     for lbl, folder_name in class_map.items():
         folder_path = os.path.join(BASE, folder_name)
-        mask_file = os.path.join(folder_path, f"{index}_streetview_0.tif")
+        mask_file = os.path.join(folder_path, f"{index}_streetview_0.png")
         if os.path.exists(mask_file):
             mask_img = Image.open(mask_file).convert("L")
             mask = np.array(mask_img) > 128
