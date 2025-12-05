@@ -27,29 +27,15 @@ def create_features(city, access_token, distance, num_sample_images, begin, end,
 
     # Make it compatible with existing code expecting "road_angle"
     features["road_angle"] = features["facade_heading"]
+    
+    # Mark none initially
+    features["save_sample"] = False
 
-    # Mark all points for sampling
-    features["save_sample"] = True
-
-    # 4) Add ids + sampling flags
-    if 'id' not in features.columns: features['id'] = range(len(features))
-    features = features.sort_values('id')
-    # Mark all points for sampling by default
-    features["save_sample"] = True
-
-    # Add IDs
-    if 'id' not in features.columns:
-        features['id'] = range(len(features))
-
-    features = features.sort_values('id')
-
-    # choose subset
-    limit = (10**9 if (num_sample_images is None or (isinstance(num_sample_images,(float,int)) and math.isinf(num_sample_images)))
-             else int(num_sample_images))
-    k = int(min(limit, len(features)))
-    if k > 0:
-        pick = random.sample(range(len(features)), k)
-        features.loc[features.index[pick], 'save_sample'] = True
+    # Random sampling
+    limit = int(num_sample_images) if num_sample_images else len(features)
+    limit = min(limit, len(features))
+    pick = random.sample(list(features.index), limit)
+    features.loc[pick, "save_sample"] = True
 
     if begin is not None and end is not None:
         features = features.iloc[begin:end]
@@ -61,8 +47,8 @@ def create_features(city, access_token, distance, num_sample_images, begin, end,
         features.to_file(os.path.join(outp, f"points_{i}.gpkg"), driver="GPKG", layer=f"points_{i}")
 
     return features
-# For each feature, calculates the facade greening potential score (GPS).
-# Returns a list of GeoJSON features.
+    # For each feature, calculates the facade greening potential score (GPS).
+    # Returns a list of GeoJSON features.
 
 # Function to validate the URL
 def is_valid_url(url):
