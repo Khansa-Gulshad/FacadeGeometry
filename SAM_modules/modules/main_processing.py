@@ -1,5 +1,5 @@
-from modules.process_data import *
-from modules.building_network import get_buildings, get_facade_sampling_points
+from SAM_modules.modules.process_data import *
+from SAM_modules.modules.building_network import get_buildings, get_facade_sampling_points
 
 import google_streetview.api
 import geopandas as gpd
