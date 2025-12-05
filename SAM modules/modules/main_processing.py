@@ -1,5 +1,5 @@
 from modules.process_data import *
-from modules.road_network import get_road_network, select_points_on_road_network, attach_road_angle
+from modules.building_network import get_buildings, get_facade_sampling_points
 
 import google_streetview.api
 import geopandas as gpd
@@ -19,18 +19,17 @@ def create_features(city, access_token, distance, num_sample_images, begin, end,
     # Fallback to env var or default only if not provided
     print(f"Creating features for city {city}")
 
-    # 1) Roads with road_angle
-    roads = get_road_network(city, bbox=bbox)                                     # change 4
-    if roads is None or (hasattr(roads, "empty") and roads.empty):
-        print("No roads found. Returning empty features.")
-        return gpd.GeoDataFrame()
+    # 1) Load buildings from OSM
+    buildings = get_buildings(city, bbox)
 
-    # 2) Sample points along roads
-    pts = select_points_on_road_network(roads, N=max(1, int(distance)))           # change 5
+    # 2) Generate façade sampling points
+    features = get_facade_sampling_points(buildings, offset_m=8.0)
 
-    # 3) Attach road_angle to points (both are in projected CRS), then convert to WGS84 for GSV
-    features = attach_road_angle(pts, roads, max_distance=1.0)                    # change 6
-    features = features.to_crs(4326)                                              # change 7
+    # Make it compatible with existing code expecting "road_angle"
+    features["road_angle"] = features["facade_heading"]
+
+    # Mark all points for sampling
+    features["save_sample"] = True
 
     # 4) Add ids + sampling flags
     if 'id' not in features.columns: features['id'] = range(len(features))
