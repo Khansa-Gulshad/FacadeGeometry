@@ -34,7 +34,14 @@ def create_features(city, access_token, distance, num_sample_images, begin, end,
     # 4) Add ids + sampling flags
     if 'id' not in features.columns: features['id'] = range(len(features))
     features = features.sort_values('id')
-    features['save_sample'] = False
+    # Mark all points for sampling by default
+    features["save_sample"] = True
+
+    # Add IDs
+    if 'id' not in features.columns:
+        features['id'] = range(len(features))
+
+    features = features.sort_values('id')
 
     # choose subset
     limit = (10**9 if (num_sample_images is None or (isinstance(num_sample_images,(float,int)) and math.isinf(num_sample_images)))
@@ -49,9 +56,8 @@ def create_features(city, access_token, distance, num_sample_images, begin, end,
 
     # 5) Optional: save roads/points like your old flow
     if save_roads_points:
-        outp = os.path.join("/mnt/project/pt01183/facade_results", city, "points"); os.makedirs(outp, exist_ok=True)
-        outr = os.path.join("/mnt/project/pt01183/facade_results", city, "roads");  os.makedirs(outr, exist_ok=True)
-        roads.to_file(os.path.join(outr, f"roads_{i}.gpkg"),   driver="GPKG", layer=f"roads_{i}")
+        outp = os.path.join("/mnt/project/pt01183/facade_results", city, "points")
+        os.makedirs(outp, exist_ok=True)
         features.to_file(os.path.join(outp, f"points_{i}.gpkg"), driver="GPKG", layer=f"points_{i}")
 
     return features
