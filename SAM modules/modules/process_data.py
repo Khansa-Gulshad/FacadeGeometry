@@ -148,95 +148,101 @@ def move_files(source_dir, destination_dir):
 
 # Takes a list of images and creates segmentation masks in the output folders
 def segment_images(sam, images, city, index, save_streetview):
-  # Temporarily save images per batch, segment them, then remove original image
-  # Also save a non-temporary copy for analysis purposes
-  temp_path = os.path.join("/mnt/project/pt01183/facade_results", city, "temp_sv_images")
-  sv_path = os.path.join("/mnt/project/pt01183/facade_results", city, "sv_images")
+    import numpy as np
 
-  for i, image in enumerate(images):
-    temp_output_path = os.path.join(temp_path, f"{index}_streetview_{i}.tif")
-    image.save(temp_output_path)
+    BASE = f"/mnt/project/pt01183/facade_results/{city}"
 
-    # Save streetview images permanently if needed
-    if save_streetview:
-      output_path = os.path.join(sv_path, f"{index}_streetview_{i}.tif")
-      image.save(output_path)
+    temp_path = os.path.join(BASE, "temp_sv_images")
+    vis_dir  = os.path.join(BASE, "seg_vis")
+    npz_dir  = os.path.join(BASE, "seg_npz")
 
-  # Get a list of files inside the temp directory
-  files = [f for f in os.listdir(temp_path) if os.path.isfile(os.path.join(temp_path, f))]
+    os.makedirs(vis_dir, exist_ok=True)
+    os.makedirs(npz_dir, exist_ok=True)
 
-  # Create segmentation masks based on the text prompts
-  # Note: Should match with folder names defined in prepare_folders()
-  text_prompts = [
-    "sky",
-    "building facade",
-    "windows doors openings",
-    "ground road pavement"
-    ]
+    # ---------------------------------------------------
+    # 1. Save street-view images temporarily
+    # ---------------------------------------------------
+    for i, image in enumerate(images):
+        temp_output_path = os.path.join(temp_path, f"{index}_streetview_{i}.tif")
+        image.save(temp_output_path)
 
-  for prompt in text_prompts:
-    out_dir = os.path.join("/mnt/project/pt01183/facade_results", city, f"temp_seg_{prompt}")
+        if save_streetview:
+            sv_output = os.path.join(BASE, "sv_images", f"{index}_streetview_{i}.tif")
+            image.save(sv_output)
 
-    sam.predict_batch(images=temp_path,
-                      out_dir=out_dir,
-                      text_prompt=prompt,
-                      box_threshold=0.24,
-                      text_threshold=0.24,
-                      merge=False
-                      )
+    # list images
+    files = sorted([f for f in os.listdir(temp_path) if f.endswith(".tif")])
 
-    # Build final label map from individual masks
-    H, W = Image.open(os.path.join(temp_path, f"{index}_streetview_0.tif")).size
+    # ---------------------------------------------------
+    # 2. SAM segmentation for 4 classes
+    # Each class needs its own folder!
+    # ---------------------------------------------------
+    prompt_to_folder = {
+        "sky":                 "temp_seg_sky",
+        "building facade":     "temp_seg_facade",
+        "windows doors openings": "temp_seg_windows",
+        "ground road pavement":   "temp_seg_ground",
+    }
 
-    label = np.zeros((W, H), dtype=np.uint8)
+    for prompt, folder in prompt_to_folder.items():
+        out_dir = os.path.join(BASE, folder)
+        os.makedirs(out_dir, exist_ok=True)
 
-    mask_dirs = {
+        sam.predict_batch(
+            images=temp_path,
+            out_dir=out_dir,
+            text_prompt=prompt,
+            box_threshold=0.24,
+            text_threshold=0.24,
+            merge=False
+        )
+
+    # ---------------------------------------------------
+    # 3. Build final label map
+    # ---------------------------------------------------
+    # Load first image to get correct size
+    sample_img = Image.open(os.path.join(temp_path, files[0]))
+    W, H = sample_img.size
+    label = np.zeros((H, W), dtype=np.uint8)
+
+    # mapping label values
+    class_map = {
         4: "temp_seg_sky",
         2: "temp_seg_facade",
         3: "temp_seg_windows",
         1: "temp_seg_ground"
     }
 
-    for lbl, folder in mask_dirs.items():
-        folder_path = os.path.join("/mnt/project/pt01183/facade_results", city, folder)
-        mask_path = os.path.join(folder_path, f"{index}_streetview_0.tif")
-
-        if os.path.exists(mask_path):
-            mask_img = Image.open(mask_path).convert("L")
+    for lbl, folder in class_map.items():
+        mask_file = os.path.join(BASE, folder, f"{index}_streetview_0.tif")
+        if os.path.exists(mask_file):
+            mask_img = Image.open(mask_file).convert("L")
             mask = np.array(mask_img) > 128
             label[mask] = lbl
 
-    # Save to NPZ
-    np.savez(
-        os.path.join("/mnt/project/pt01183/facade_results", city, "seg_npz", f"{index}.npz"),
-        seg=label
-    )
+    # ---------------------------------------------------
+    # 4. Save NPZ
+    # ---------------------------------------------------
+    np.savez(os.path.join(npz_dir, f"{index}.npz"), seg=label)
 
-    # ==========================================
-    # SAVE VISUALIZATION PNG (for debugging)
-    # ==========================================
-
+    # ---------------------------------------------------
+    # 5. Save visualization PNG
+    # ---------------------------------------------------
     color_map = {
-        0: (0, 0, 0),          # background
-        1: (153, 102, 51),     # ground
-        2: (255, 255, 0),      # façade
-        3: (0, 0, 255),        # windows/doors
-        4: (0, 255, 255)       # sky
-        }
+        0: (0,0,0),
+        1: (153,102,51),
+        2: (255,255,0),
+        3: (0,0,255),
+        4: (0,255,255)
+    }
 
-    # Create visualization image
-    vis = np.zeros((label.shape[0], label.shape[1], 3), dtype=np.uint8)
-    for lbl, color in color_map.items():
-        vis[label == lbl] = color
+    vis = np.zeros((H, W, 3), dtype=np.uint8)
+    for lbl, rgb in color_map.items():
+        vis[label == lbl] = rgb
 
-    # Save PNG
-    vis_path = os.path.join(
-        "/mnt/project/pt01183/facade_results",
-        city,
-        "seg_vis",
-        f"{index}.png"
-    )
-    Image.fromarray(vis).save(vis_path)
-    print(f"  ✓ Saved visualization PNG → {vis_path}")
-  # Remove SV images to prevent duplicate predictions
-  delete_files(temp_path)
+    Image.fromarray(vis).save(os.path.join(vis_dir, f"{index}.png"))
+
+    # ---------------------------------------------------
+    # 6. Clean temp directory
+    # ---------------------------------------------------
+    delete_files(temp_path)
