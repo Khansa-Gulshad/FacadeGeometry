@@ -127,8 +127,8 @@ def calculate_usable_wall_ratios(
             continue
 
         # ---------- 2) Fetch the two perpendicular views directly ----------
-        left_h  = (ra - 90) % 360
-        right_h = (ra + 90) % 360
+        heading = ra
+        im = fetch_view(pano_id, heading, access_token, radius, fov="90", pitch_=pitch)
 
         def fetch_view(pano_id_, heading, key, radius_, fov="90", pitch_="25"):
             import google_streetview.api, requests
@@ -155,22 +155,10 @@ def calculate_usable_wall_ratios(
                 ).convert("RGB")
             except Exception:
                 return None
+        im = fetch_view(pano_id, heading, access_token, radius, fov="90", pitch_=pitch)
 
-        left_im  = fetch_view(pano_id, left_h,  access_token, radius, fov="90", pitch_=pitch)
-        right_im = fetch_view(pano_id, right_h, access_token, radius, fov="90", pitch_=pitch)
-
-        # optional: crop like Mapillary (trim sky/road)
-        def crop_sv(img, crop_top=0.05, crop_bottom=0.30):
-            w, h = img.size
-            return img.crop((0, int(h * crop_top), w, int(h * (1 - crop_bottom))))
-
-        images = []
-        for im in (left_im, right_im):
-            if im is not None:
-                images.append(crop_sv(im, 0.05, 0.30))
-
-        if not images:
-            print(f"[GSV] No perpendicular views for idx {index}")
+        if im is None:
+            print(f"[GSV] Could not fetch façade view for idx {index}")
             continue
 
         # ---------- 3) Segment the two views ----------
