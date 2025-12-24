@@ -178,13 +178,15 @@ def calculate_usable_wall_ratios(
             w, h = img.size
             return img.crop((0, int(h * crop_top), w, int(h * (1 - crop_bottom))))
 
-        ratios = []
+        ratios_by_side = {"left": None, "right": None}
 
-        for view_id, img in enumerate(images):
+        for view_id, (side, h) in enumerate([("left", headings[0]), ("right", headings[1])]):
+            img = fetch_view(pano_id, h, access_token, radius, fov="90", pitch_=pitch)
+            if img is None:
+                continue
+                
             img_c = crop_sv(img, 0.05, 0.30)
-
-    #Use unique index per view
-            view_index = f"{index}_{view_id}"
+            view_index = f"{index}_{side}"   # clearer than 0/1
 
             segment_images(sam, [img_c], city, view_index, save_streetview)
 
@@ -193,39 +195,20 @@ def calculate_usable_wall_ratios(
                 continue
 
             seg = np.load(npz_path)["seg"]
-
             fcnt = (seg == 2).sum()
             wcnt = (seg == 3).sum()
 
             if fcnt > 0:
-                ratios.append((fcnt - wcnt) / fcnt)
+                ratios_by_side[side] = (fcnt - wcnt) / fcnt
 
-        # 4) load label map and compute usable façade ratio
-        npz_path = os.path.join(seg_npz_dir, f"{index}.npz")
-        if not os.path.exists(npz_path):
-            print(f"[SAM] Missing NPZ for idx {index}")
+        # require at least one valid side
+        valid = [v for v in ratios_by_side.values() if v is not None]
+        if not valid:
             continue
 
-        seg = np.load(npz_path)["seg"]
-
-        # labels: 1=ground, 2=facade, 3=windows/doors, 4=sky
-        fcnt = (seg == 2).sum()
-        wcnt = (seg == 3).sum()
-        ratio = (fcnt - wcnt) / fcnt if fcnt > 0 else 0.0
-
-        if len(ratios) == 0:
-            continue
-
-        WAR = sum(ratios) / len(ratios)
-
-        rL = ratios[0] if len(ratios) > 0 else None
-        rR = ratios[1] if len(ratios) > 1 else None
-
-        WAR = round(WAR, 3)
-
-        "ratio_left": rL,
-        "ratio_right": rR,
-
+        WAR = round(sum(valid) / len(valid), 3)
+        rL = ratios_by_side["left"]
+        rR = ratios_by_side["right"]
         # 5) optionally attach SVI path
         image_paths = []
         if save_streetview:
