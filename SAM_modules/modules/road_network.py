@@ -27,7 +27,8 @@ def get_road_network(city, bbox):
             )
         else:
             G = ox.graph_from_place(city, simplify=True, custom_filter=cf)
-    except Exception:
+    except Exception as e:
+        print(f"[OSM] Road extraction failed: {e}")
         return gpd.GeoDataFrame(), None
 
     # Remove duplicate reversed edges + compute road angle
@@ -95,6 +96,7 @@ def select_points_on_road_network(roads, N=50):
         line = row.geometry
         rid = row.Index
 
+        N = max(1, int(N))
         for d in range(0, int(line.length), N):
             pts.append([line.interpolate(d), rid])
 
