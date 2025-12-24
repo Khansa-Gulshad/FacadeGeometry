@@ -1,5 +1,5 @@
 from SAM_modules.modules.process_data import *
-from SAM_modules.modules.road_network import (get_road_network, select_points_on_road_network, remove_intersection_points)
+from SAM_modules.modules.road_network import (get_road_network, select_points_on_road_network, remove_intersection_points, attach_road_angle)
 
 
 import google_streetview.api
