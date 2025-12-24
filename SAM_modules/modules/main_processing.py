@@ -178,10 +178,27 @@ def calculate_usable_wall_ratios(
             w, h = img.size
             return img.crop((0, int(h * crop_top), w, int(h * (1 - crop_bottom))))
 
-        im_c = crop_sv(im, 0.05, 0.30)
+        ratios = []
 
-        # 3) segment (this will create seg_npz/{index}.npz & seg_vis/{index}.png)
-        segment_images(sam, [im_c], city, index, save_streetview)
+        for view_id, img in enumerate(images):
+            img_c = crop_sv(img, 0.05, 0.30)
+
+    #Use unique index per view
+            view_index = f"{index}_{view_id}"
+
+            segment_images(sam, [img_c], city, view_index, save_streetview)
+
+            npz_path = os.path.join(seg_npz_dir, f"{view_index}.npz")
+            if not os.path.exists(npz_path):
+                continue
+
+            seg = np.load(npz_path)["seg"]
+
+            fcnt = (seg == 2).sum()
+            wcnt = (seg == 3).sum()
+
+            if fcnt > 0:
+                ratios.append((fcnt - wcnt) / fcnt)
 
         # 4) load label map and compute usable façade ratio
         npz_path = os.path.join(seg_npz_dir, f"{index}.npz")
@@ -196,9 +213,18 @@ def calculate_usable_wall_ratios(
         wcnt = (seg == 3).sum()
         ratio = (fcnt - wcnt) / fcnt if fcnt > 0 else 0.0
 
-        # For compatibility, treat this as WAR (one view only)
-        WAR = ratio
-        rL, rR = ratio, None
+        if len(ratios) == 0:
+            continue
+
+        WAR = sum(ratios) / len(ratios)
+
+        rL = ratios[0] if len(ratios) > 0 else None
+        rR = ratios[1] if len(ratios) > 1 else None
+
+        WAR = round(WAR, 3)
+
+        "ratio_left": rL,
+        "ratio_right": rR,
 
         # 5) optionally attach SVI path
         image_paths = []
