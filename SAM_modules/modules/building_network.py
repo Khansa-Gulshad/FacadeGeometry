@@ -9,6 +9,92 @@ from shapely.ops import orient
 # -------------------------------------------------------
 # LOAD BUILDINGS FROM OSM (city name OR bbox)
 # -------------------------------------------------------
+def snap_points_to_roads(
+    gdf_points,
+    city=None,
+    bbox=None,
+    min_dist_to_intersection=12.0
+):
+    """
+    Snap façade sampling points to nearest drivable road,
+    excluding points near intersections.
+
+    Args:
+        gdf_points : GeoDataFrame (EPSG:4326)
+        city       : city name (str) OR
+        bbox       : [minx, miny, maxx, maxy] in lon/lat
+        min_dist_to_intersection : meters
+
+    Returns:
+        GeoDataFrame with snapped points
+    """
+
+    print("\n========== SNAPPING POINTS TO ROADS ==========")
+
+    # ------------------------------------------------------------------
+    # 1. Load drivable road network
+    # ------------------------------------------------------------------
+    if bbox is not None:
+        G = ox.graph_from_bbox(
+            north=bbox[3], south=bbox[1],
+            east=bbox[2], west=bbox[0],
+            network_type="drive"
+        )
+    else:
+        G = ox.graph_from_place(city, network_type="drive")
+
+    # Project graph to meters
+    G = ox.project_graph(G)
+
+    # Nodes & edges
+    nodes, edges = ox.graph_to_gdfs(G)
+
+    # ------------------------------------------------------------------
+    # 2. Project points to same CRS
+    # ------------------------------------------------------------------
+    gdf = gdf_points.to_crs(edges.crs)
+
+    snapped_pts = []
+
+    for idx, row in gdf.iterrows():
+        pt = row.geometry
+
+        # nearest edge
+        try:
+            u, v, key = ox.distance.nearest_edges(G, pt.x, pt.y)
+        except Exception:
+            continue
+
+        edge = edges.loc[(u, v, key)]
+
+        # ------------------------------------------------------------------
+        # 3. Reject points near intersections
+        # ------------------------------------------------------------------
+        u_pt = nodes.loc[u].geometry
+        v_pt = nodes.loc[v].geometry
+
+        if pt.distance(u_pt) < min_dist_to_intersection:
+            continue
+        if pt.distance(v_pt) < min_dist_to_intersection:
+            continue
+
+        # ------------------------------------------------------------------
+        # 4. Snap to edge geometry
+        # ------------------------------------------------------------------
+        line = edge.geometry
+        snapped_geom = line.interpolate(line.project(pt))
+
+        new_row = row.copy()
+        new_row.geometry = snapped_geom
+        snapped_pts.append(new_row)
+
+    snapped_gdf = gpd.GeoDataFrame(snapped_pts, crs=edges.crs)
+
+    # Back to WGS84 for GSV
+    snapped_gdf = snapped_gdf.to_crs(4326)
+
+    print(f"✓ Snapped {len(snapped_gdf)} points to roads (no intersections)")
+    return snapped_gdf
 
 def get_buildings(city=None, bbox=None):
     """
