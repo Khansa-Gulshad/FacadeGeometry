@@ -1,5 +1,6 @@
 from SAM_modules.modules.process_data import *
-from SAM_modules.modules.building_network import get_buildings, get_facade_sampling_points
+from SAM_modules.modules.road_network import (get_road_network, select_points_on_road_network, remove_intersection_points)
+
 
 import google_streetview.api
 import geopandas as gpd
@@ -15,42 +16,34 @@ from urllib.parse import urlparse
 # GitHub: https://github.com/Spatial-Data-Science-and-GEO-AI-Lab/StreetView-NatureVisibility-GSV
 # Prepare facade folders, create road network, and create features. 
 # Load pre-existing features instead of generating them
-def create_features(city, access_token, distance, num_sample_images, begin, end, save_roads_points, i=0, bbox=None):
-    print(f"Creating features for city {city}")
+def create_features(
+    city,
+    access_token,
+    N=20,                 # <-- spacing parameter
+    save_roads_points=True,
+    bbox=None
+):
+    print(f"Creating road-based sampling points for {city}")
 
-    # 1) Load buildings
-    buildings = get_buildings(city, bbox)
+    # 1) Roads
+    roads, G = get_road_network(city, bbox)
 
-    # 2) Generate façade sampling points
-    features = get_facade_sampling_points(buildings, offset_m=8.0)
+    # 2) Sample points every N meters
+    points = select_points_on_road_network(roads, N=N)
 
-    # Make it compatible: use "road_angle" = direction we want to look at façade
-    features["road_angle"] = features["facade_heading"]
+    # 3) Remove intersections
+    points = remove_intersection_points(points, G, min_dist=12.0)
 
-    # Mark none initially
-    features["save_sample"] = False
+    # 4) Attach road_angle from nearest road segment
+    points = gpd.sjoin_nearest(points, roads[["geometry", "road_angle"]], how="left")
 
-    # Sampling
-    limit = int(num_sample_images) if num_sample_images else len(features)
-    limit = min(limit, len(features))
-    pick = random.sample(list(features.index), limit)
-    features.loc[pick, "save_sample"] = True
-
-    if 'id' not in features.columns:
-        features['id'] = range(len(features))
-
-    features = features.sort_values('id')
-
-    if begin is not None and end is not None:
-        features = features.iloc[begin:end]
-
+    # 5) Save
     if save_roads_points:
         outp = os.path.join("/mnt/project/pt01183/facade_results", city, "points")
         os.makedirs(outp, exist_ok=True)
-        features.to_file(os.path.join(outp, f"points_{i}.gpkg"), driver="GPKG", layer=f"points_{i}")
+        points.to_file(os.path.join(outp, f"road_points_N{N}.gpkg"), driver="GPKG")
 
-    return features
-
+    return points
 
 # Function to validate the URL
 def is_valid_url(url):
