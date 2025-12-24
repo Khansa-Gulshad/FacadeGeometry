@@ -74,7 +74,6 @@ def calculate_usable_wall_ratios(
     sam,
     access_token,
     save_streetview,
-    bbox_i="0",
     radius=15,
     pitch="25"
 ):
@@ -167,12 +166,6 @@ def calculate_usable_wall_ratios(
         (ra + 90) % 360    # right façade
         ]
 
-        images = []
-        for h in headings:
-            img = fetch_view(pano_id, h, access_token, radius, fov="90", pitch_=pitch)
-            if img is not None:
-                images.append(img)
-
         # optional: crop SVI
         def crop_sv(img, crop_top=0.05, crop_bottom=0.30):
             w, h = img.size
@@ -213,9 +206,10 @@ def calculate_usable_wall_ratios(
         image_paths = []
         if save_streetview:
             sv_dir = os.path.join(city_root, "sv_images")
-            pth = os.path.join(sv_dir, f"{index}_streetview_0.tif")
-            if os.path.isfile(pth):
-                image_paths.append(pth)
+            for side in ("left", "right"):
+                pth = os.path.join(sv_dir, f"{index}_{side}_streetview_0.png")
+                if os.path.isfile(pth):
+                    image_paths.append(pth)
 
         # 6) record feature
         usable_ratio.append(Feature(
