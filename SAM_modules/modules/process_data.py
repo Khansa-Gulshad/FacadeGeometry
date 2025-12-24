@@ -32,65 +32,6 @@ def prepare_folder(city, folder_name):
       os.makedirs(dir_path)
 
 
-# Function adapted from iabrilvzqz
-# GitHub: https://github.com/Spatial-Data-Science-and-GEO-AI-Lab/StreetView-NatureVisibility-GSV
-# Processes street view imagery (SVI) based on an image URL.
-# Returns a list of processed images (1 for normal SVI, 2 for panoramic SVI)
-def process_image(img_or_url, is_panoramic, road_angle):
-    """
-    Mapillary-style:
-    - Accept a URL *or* a PIL.Image
-    - If panoramic: crop bottom 20%, then extract the two perpendicular faces.
-    - If not: just return the single image.
-    """
-    # NEW: accept PIL image as well as URL
-    if isinstance(img_or_url, str):
-        image = Image.open(requests.get(img_or_url, stream=True).raw)
-    else:
-        image = img_or_url  # PIL.Image.Image
-
-    if is_panoramic:
-        width, height = image.size
-        # Mapillary logic: keep top 80% (crop out bottom 20%)
-        cropped_height = int(height * 0.8)
-        image = image.crop((0, 0, width, cropped_height))
-
-        # Split pano into two perpendicular faces using road_angle
-        left_face, right_face = get_perpendicular_images(image, road_angle)
-        images = [left_face, right_face]
-    else:
-        images = [image]
-
-    return images
-# Takes a panoramic SVI and returns two images looking perpendicular from the road
-def get_perpendicular_images(image, road_angle):
-    width, height = image.size
-    eighth_width = int(0.125 * width)
-
-    # We want left and right facing images. Wrap around in case values are out of bounds
-    wanted_angles = ((road_angle - 90) % 360, (road_angle + 90) % 360)
-
-    faces = []
-    original_image = image.copy()
-
-    # We want 1/8th of the image before and after the wanted angle within the shot (1/4th total)
-    for wanted_angle in wanted_angles:
-        image = original_image.copy()
-
-        # E.g. if wanted_angle is 10, the wanted shift is to fraction 0.0278  of the image on a 0-1 range
-        wanted_fractional_axis = float(wanted_angle)/360.0
-        wanted_axis= int(width * wanted_fractional_axis)
-
-        left_max = max(wanted_axis - eighth_width, 0)
-        right_max = min(wanted_axis + eighth_width, width)
-        perpendicular_face = image.crop((left_max, 0, right_max, height))
-
-        faces.append(perpendicular_face)
-
-    # Return the left and right perpendicular face
-    return faces
-
-
 # Takes an input path and deletes all files inside of that path
 def delete_files(path):
   files = os.listdir(path)
@@ -114,23 +55,6 @@ def count_white_pixels(image):
   else:
     im = im.convert("RGB")
     return sum(1 for r, g, b in im.getdata() if r >= 250 and g >= 250 and b >= 250)
-
-# Calculates weighted average ratio (WAR) of two perpendicular looking images
-def calculate_WAR(width_A, height_A, ratio_A, width_B, height_B, ratio_B):
-  size_A = width_A * height_A
-  size_B = width_B * height_B
-
-  # Calculate weighted ratio (WR) for each image
-  WR_A = ratio_A * size_A
-  WR_B = ratio_B * size_B
-
-  # Calculate weighted average ratio (WAR)
-  WR_total = WR_A + WR_B
-  total_size = size_A + size_B
-
-  WAR = WR_total / total_size
-
-  return WAR
 
 
 # Finds all images (files) inside two directories and returns them as lists
