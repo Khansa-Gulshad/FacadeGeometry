@@ -118,16 +118,3 @@ def select_points_on_road_network(roads, N=50):
 
   return gdf_points
 
-
-# Function courtesy of iabrilvzqz
-# GitHub: https://github.com/Spatial-Data-Science-and-GEO-AI-Lab/StreetView-NatureVisibility-GSV
-# This function extracts the features for a given tile
-
-# Function adapted from iabrilvzqz
-# GitHub: https://github.com/Spatial-Data-Science-and-GEO-AI-Lab/StreetView-NatureVisibility-GSV
-
-
-  # Transform the coordinate reference system to EPSG 4326
-  points.to_crs(epsg=4326, inplace=True)
-
-  return points
