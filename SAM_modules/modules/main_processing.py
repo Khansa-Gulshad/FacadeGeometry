@@ -162,10 +162,16 @@ def calculate_usable_wall_ratios(
             continue
 
         # 2) fetch façade view
-        im = fetch_view(pano_id, ra, access_token, radius, fov="90", pitch_=pitch)
-        if im is None:
-            print(f"[GSV] Could not fetch façade view for idx {index}")
-            continue
+        headings = [
+        (ra - 90) % 360,   # left façade
+        (ra + 90) % 360    # right façade
+        ]
+
+        images = []
+        for h in headings:
+            img = fetch_view(pano_id, h, access_token, radius, fov="90", pitch_=pitch)
+            if img is not None:
+                images.append(img)
 
         # optional: crop SVI
         def crop_sv(img, crop_top=0.05, crop_bottom=0.30):
