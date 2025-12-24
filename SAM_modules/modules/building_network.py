@@ -136,12 +136,22 @@ def get_facade_sampling_points(buildings, offset_m=8.0):
             mx = (x0 + x1) / 2
             my = (y0 + y1) / 2
 
-            # wall orientation
             wall_bearing = compute_bearing(x0, y0, x1, y1)
 
-            # outward direction
-            normal = outward_normal(wall_bearing)
+            # candidate normal
+            n1 = (wall_bearing - 90) % 360
+            n2 = (wall_bearing + 90) % 360
 
+            # test which normal points away from centroid
+            cx, cy = poly.centroid.coords[0]
+
+            tx1, ty1 = move_point(mx, my, n1, 1.0)
+            tx2, ty2 = move_point(mx, my, n2, 1.0)
+
+            d1 = math.dist((tx1, ty1), (cx, cy))
+            d2 = math.dist((tx2, ty2), (cx, cy))
+
+            normal = n1 if d1 > d2 else n2
             # move outward
             sx, sy = move_point(mx, my, normal, offset_m)
 
