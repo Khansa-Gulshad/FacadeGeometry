@@ -18,30 +18,43 @@ from urllib.parse import urlparse
 # Load pre-existing features instead of generating them
 def create_features(
     city,
-    access_token,
-    N=20,                 # <-- spacing parameter
-    save_roads_points=True,
-    bbox=None
+    N=20,
+    bbox=None,
+    district=None,
+    save_roads_points=True
 ):
     print(f"Creating road-based sampling points for {city}")
 
-    # 1) Roads
+    # 1) Road network
     roads, G = get_road_network(city, bbox)
+    if roads.empty or G is None:
+        raise RuntimeError("No roads extracted")
 
-    # 2) Sample points every N meters
+    # 2) Sample points
     points = select_points_on_road_network(roads, N=N)
 
     # 3) Remove intersections
     points = remove_intersection_points(points, G, min_dist=12.0)
 
-    # 4) Attach road_angle from nearest road segment
-    points = gpd.sjoin_nearest(points, roads[["geometry", "road_angle"]], how="left")
+    # 4) Attach road angle
+    points = attach_road_angle(points, roads)
 
-    # 5) Save
+    # 5) Clip to district (IMPORTANT)
+    if district is not None:
+        points = gpd.clip(points, district)
+
+    # 6) Save
     if save_roads_points:
-        outp = os.path.join("/mnt/project/pt01183/facade_results", city, "points")
+        outp = os.path.join(
+            "/mnt/project/pt01183/facade_results",
+            city,
+            "points"
+        )
         os.makedirs(outp, exist_ok=True)
-        points.to_file(os.path.join(outp, f"road_points_N{N}.gpkg"), driver="GPKG")
+        points.to_file(
+            os.path.join(outp, f"road_points_N{N}.gpkg"),
+            driver="GPKG"
+        )
 
     return points
 
