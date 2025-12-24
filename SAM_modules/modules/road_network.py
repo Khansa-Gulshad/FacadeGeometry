@@ -108,4 +108,14 @@ def select_points_on_road_network(roads, N=50):
     gdf = gdf.drop_duplicates(subset=["geometry"]).reset_index(drop=True)
 
     return gdf
-
+    
+def attach_road_angle(points: gpd.GeoDataFrame, roads: gpd.GeoDataFrame, max_distance=1.0) -> gpd.GeoDataFrame:
+    """
+    Nearest-edge spatial join to bring 'road_angle' from road edges onto points.
+    Assumes BOTH 'points' and 'roads' are in the SAME (projected) CRS (what osmnx returns).
+    """
+    out = gpd.sjoin_nearest(points, roads[['geometry', 'road_angle']], how='left', max_distance=max_distance)
+    # clean up join artifacts
+    drop_cols = [c for c in out.columns if c.startswith('index_right')]
+    out = out.drop(columns=drop_cols, errors='ignore')
+    return out
