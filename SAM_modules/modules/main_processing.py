@@ -166,11 +166,6 @@ def calculate_usable_wall_ratios(
         (ra + 90) % 360    # right façade
         ]
 
-        # optional: crop SVI
-        def crop_sv(img, crop_top=0.05, crop_bottom=0.30):
-            w, h = img.size
-            return img.crop((0, int(h * crop_top), w, int(h * (1 - crop_bottom))))
-
         ratios_by_side = {"left": None, "right": None}
 
         for view_id, (side, h) in enumerate([("left", headings[0]), ("right", headings[1])]):
@@ -183,11 +178,8 @@ def calculate_usable_wall_ratios(
             rgb_dir = os.path.join(city_root, "rgb_images")
             os.makedirs(rgb_dir, exist_ok=True)
             img.save(os.path.join(rgb_dir, f"{view_index}.png"))
-            
-            img_c = crop_sv(img, 0.05, 0.30)
-            
 
-            segment_images(sam, [img_c], city, view_index, save_streetview)
+            segment_images(sam, [img], city, view_index, save_streetview)
 
             npz_path = os.path.join(seg_npz_dir, f"{view_index}.npz")
             if not os.path.exists(npz_path):
