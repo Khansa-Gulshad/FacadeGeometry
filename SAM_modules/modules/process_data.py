@@ -136,6 +136,8 @@ def segment_images(sam, images, city, index, save_streetview):
         out_dir = os.path.join(BASE, folder)
         os.makedirs(out_dir, exist_ok=True)
 
+        delete_files(out_dir)
+
         sam.predict_batch(
             images=temp_path,
             out_dir=out_dir,
