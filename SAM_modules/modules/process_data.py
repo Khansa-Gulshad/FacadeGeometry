@@ -131,6 +131,8 @@ def segment_images(sam, images, city, index, save_streetview):
         "ground road pavement":    "temp_seg_ground",
     }
 
+    delete_files(os.path.join(BASE, folder))
+
     for prompt, folder in prompt_to_folder.items():
         out_dir = os.path.join(BASE, folder)
         os.makedirs(out_dir, exist_ok=True)
