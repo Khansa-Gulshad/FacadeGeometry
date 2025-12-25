@@ -10,6 +10,7 @@ def prepare_folders(city):
     folder_names = [
         "points",
         "roads",
+        "rgb_images",
         "temp_sv_images",
         "sv_images",
         # SAM temp outputs for each prompt
@@ -199,8 +200,3 @@ def segment_images(sam, images, city, index, save_streetview):
     # ---------------------------------------------------
     delete_files(temp_path)
 
-
-    # ---------------------------------------------------
-    # 6. Clean temp directory
-    # ---------------------------------------------------
-    delete_files(temp_path)
