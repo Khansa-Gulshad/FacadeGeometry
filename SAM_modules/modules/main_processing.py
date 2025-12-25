@@ -178,13 +178,14 @@ def calculate_usable_wall_ratios(
             if img is None:
                 continue
                 
+            view_index = f"{index}_{side}"   # clearer than 0/1    
             # SAVE RGB FOR HEIGHT MODEL
             rgb_dir = os.path.join(city_root, "rgb_images")
             os.makedirs(rgb_dir, exist_ok=True)
             img.save(os.path.join(rgb_dir, f"{view_index}.png"))
             
             img_c = crop_sv(img, 0.05, 0.30)
-            view_index = f"{index}_{side}"   # clearer than 0/1
+            
 
             segment_images(sam, [img_c], city, view_index, save_streetview)
 
