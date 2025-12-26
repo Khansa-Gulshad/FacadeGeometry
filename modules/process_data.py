@@ -179,7 +179,8 @@ def download_facade_masks_for_point(
     records = []
 
     for side, h in views:
-        image_id = f"{row.id}_{side}"
+        pid = row.get("id", row.name)
+        image_id = f"{pid}_{side}"
 
         try:
             img = fetch_gsv_image_by_location(
