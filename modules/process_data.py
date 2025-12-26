@@ -28,6 +28,14 @@ import modules.config as cfg
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
+# =========================
+# CHECKPOINT (resume support)
+# =========================
+CHECKPOINT_FILE = os.path.join(
+    cfg.PROJECT_DIR,
+    cfg.city_to_dir("Gdańsk, Poland"),
+    "processed_points.txt"
+)
 
 # =========================
 # FOLDERS
@@ -246,6 +254,15 @@ def download_images_for_points(
             try:
                 recs = f.result()
                 manifest.extend(recs)
+
+                # recs contains two entries: left + right
+                # image_id looks like "123_left"
+                image_id = recs[0][0]
+                pid = int(image_id.split("_")[0])
+
+                with open(CHECKPOINT_FILE, "a") as fh:
+                    fh.write(f"{pid}\n")
+
             except Exception as e:
                 tb = traceback.format_exc()
                 print("\nPOINT_ERROR:", repr(e))
