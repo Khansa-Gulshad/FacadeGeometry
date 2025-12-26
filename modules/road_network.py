@@ -21,10 +21,13 @@ def get_road_network(city, bbox):
 
     try:
         if bbox:
-            G = ox.graph_from_bbox(
-                bbox[3], bbox[1], bbox[2], bbox[0],
-                simplify=True, custom_filter=cf
-            )
+            # bbox = [minx, miny, maxx, maxy]
+            north = bbox[3]
+            south = bbox[1]
+            east  = bbox[2]
+            west  = bbox[0]
+
+            G = ox.graph_from_bbox(north, south, east, west, simplify=True, custom_filter=cf)
         else:
             G = ox.graph_from_place(city, simplify=True, custom_filter=cf)
     except Exception as e:
