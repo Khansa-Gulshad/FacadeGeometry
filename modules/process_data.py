@@ -12,6 +12,7 @@ import numpy as np
 
 import geopandas as gpd
 import torch
+import traceback
 from io import BytesIO
 from PIL import Image, ImageFile
 from tqdm import tqdm
@@ -244,8 +245,11 @@ def download_images_for_points(
             try:
                 recs = f.result()
                 manifest.extend(recs)
-            except Exception:
-                manifest.append(["POINT_ERROR", "ERROR", None, pitch_deg, fov_deg])
+            except Exception as e:
+                tb = traceback.format_exc()
+                print("\nPOINT_ERROR:", repr(e))
+                print(tb)
+                manifest.append(["POINT_ERROR", f"{type(e).__name__}: {e}", None, pitch_deg, fov_deg])
 
     # write manifest
     out_dir = os.path.join(cfg.PROJECT_DIR, cfg.city_to_dir(city), "seg_3class_vis")
