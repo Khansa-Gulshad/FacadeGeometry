@@ -170,44 +170,45 @@ def download_facade_masks_for_point(
             ra = 0.0
     except Exception:
         ra = 0.0
+    views = [
+        ("left",  (ra - 90) % 360),
+        ("right", (ra + 90) % 360),
+            ]
 
-    headings = [ (ra + 90) % 360, (ra + 270) % 360 ]
     records = []
 
-    for h in headings:
-        image_id = f"{row.id}_{_round_heading(h)}"
+    for side, h in views:
+        image_id = f"{row.id}_{side}"
+
         try:
             img = fetch_gsv_image_by_location(
                 lat, lon,
-                heading=h, pitch=pitch_deg, fov=fov_deg, size=size,
+                heading=h,
+                pitch=pitch_deg,
+                fov=fov_deg,
+                size=size,
                 api_key=access_token
             )
-            # --- segment once, get both masks ---
+
             mask_full, mask3 = process_facade_view(img, processor, model)
 
-            # --- save full 19-class artifacts ---
-            rgb_path = save_rgb(city, image_id, img)           # RGB for SIHE
-            save_full_color(city, image_id, mask_full)       # seg_full_vis/<id>.png (19-class color)
-            save_three_color(city, image_id, mask3)        # seg_3class_vis/<id>.png (3-class color)
+            save_rgb(city, image_id, img)
+            save_full_color(city, image_id, mask_full)
+            save_three_color(city, image_id, mask3)
+            save_three_class_mask(city, image_id, mask3)
+            label_npz = save_three_class_npz(city, image_id, mask3)
 
-            # --- save the actual LABELS SIHE will consume ---
-            label_png  = save_three_class_mask(city, image_id, mask3)     # -> <City>/seg_3class/<id>.png (grayscale IDs)
-            label_npz  = save_three_class_npz(city, image_id, mask3)      # -> <City>/seg/<id>_seg.npz   (seg=mask3)
-            
-            
-            # optional QA overlay
             if save_sample:
-                save_full_overlay(city, image_id, np.array(img),  # <-- new: RGB + 19-class color overlay
-                  mask_full, alpha=0.65, soften_sigma=0.8)
-                
-            # record the 3-class visual path in the manifest
-            mask_path = os.path.join(cfg.PROJECT_DIR, cfg.city_to_dir(city), "seg_3class_vis", f"{image_id}.png")
-           
-            records.append([image_id, label_npz, h, pitch_deg, fov_deg])
-        except Exception as e:
-            records.append([image_id, f"ERROR: {e}", h, pitch_deg, fov_deg])
+                save_full_overlay(
+                    city, image_id,
+                    np.array(img), mask_full,
+                    alpha=0.65, soften_sigma=0.8
+                )
 
-    return records  # list of [image_id, mask_path|ERROR, heading, pitch, fov]
+            records.append([image_id, label_npz, side, pitch_deg, fov_deg])
+
+        except Exception as e:
+            records.append([image_id, f"ERROR: {e}", side, pitch_deg, fov_deg])
 
 
 # =========================
@@ -251,7 +252,7 @@ def download_images_for_points(
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "manifest.csv"), "w", newline="") as fh:
         w = csv.writer(fh)
-        w.writerow(["image_id", "mask_path", "heading_deg", "pitch_deg", "fov_deg"])
+        w.writerow(["image_id", "mask_path", "side", "pitch_deg", "fov_deg"])
         for row in manifest:
             w.writerow(row)
 
