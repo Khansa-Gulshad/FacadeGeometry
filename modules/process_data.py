@@ -209,7 +209,7 @@ def download_facade_masks_for_point(
 
         except Exception as e:
             records.append([image_id, f"ERROR: {e}", side, pitch_deg, fov_deg])
-
+    return records
 
 # =========================
 # BATCH DRIVER (uses *your* points with road_angle)
