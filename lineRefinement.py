@@ -6,6 +6,11 @@ import skimage
 import numpy as np
 
 
+def clamp_rc(pt, rows, cols):
+    pt[0] = min(rows - 1, max(0, pt[0]))
+    pt[1] = min(cols - 1, max(0, pt[1]))
+    return pt
+
 def extendLines(pt1, pt2, segmt, config):
     """
     Extend a vertical line segment until roof (building→sky) upward and ground (building→ground) downward.
@@ -40,11 +45,16 @@ def extendLines(pt1, pt2, segmt, config):
 
     if not (0 <= pt_middle[0] < rows and 0 <= pt_middle[1] < cols):
         return [], []
-
+        
+    pt_up_end   = clamp_rc(pt_up_end, rows, cols)
+    pt_down_end = clamp_rc(pt_down_end, rows, cols)
+    pt_middle   = clamp_rc(pt_middle, rows, cols)
     # Require the three probe points to be on building
-    rU, cU = int(pt_up_end[0] + 0.5),   int(pt_up_end[1] + 0.5)
-    rD, cD = int(pt_down_end[0] + 0.5), int(pt_down_end[1] + 0.5)
-    rM, cM = int(pt_middle[0] + 0.5),   int(pt_middle[1] + 0.5)
+    
+    rU, cU = int(pt_up_end[0]),   int(pt_up_end[1])
+    rD, cD = int(pt_down_end[0]), int(pt_down_end[1])
+    rM, cM = int(pt_middle[0]),   int(pt_middle[1])
+
     if (segmt[rU, cU] != building_label or
         segmt[rD, cD] != building_label or
         segmt[rM, cM] != building_label):
