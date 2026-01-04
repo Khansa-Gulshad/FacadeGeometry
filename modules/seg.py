@@ -1,14 +1,10 @@
 # seg.py
 import os
-import numpy as np
 import torch
-from PIL import Image, ImageFile
+from PIL import Image
 from tqdm import tqdm
 from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation
-import torch
 
-
-import modules.config as cfg
 from modules.segmentation import (
     remap_to_three,
     save_three_class_mask,
@@ -16,6 +12,7 @@ from modules.segmentation import (
     save_three_color,
     save_full_overlay,
 )
+import modules.config as cfg
 
 assert torch.cuda.is_available(), "❌ CUDA not available"
 device = torch.device("cuda")
@@ -58,49 +55,53 @@ model.eval()
 # -------------------------------------------------
 # SEGMENTATION LOOP
 # -------------------------------------------------
-images = sorted(fn for fn in os.listdir(IMG_DIR) if fn.endswith(".jpg"))
+img_files = [f for f in os.listdir(IMG_DIR) if f.endswith(".jpg")]
 print(f"[INFO] Found {len(images)} images to segment")
 
-for fn in tqdm(images, desc="Mask2Former segmentation"):
+for fn in tqdm(img_files, desc="Segmenting images"):
     image_id = fn.replace(".jpg", "")
-    img_path = os.path.join(IMG_DIR, fn)
 
-    try:
-        img = Image.open(img_path).convert("RGB")
-    except Exception as e:
-        print(f"[WARN] Could not open {fn}: {e}")
+    # 🔴 SKIP if already processed
+    seg_npz_path = os.path.join(
+        cfg.PROJECT_DIR,
+        cfg.city_to_dir(CITY),
+        "seg",
+        f"{image_id}_seg.npz"
+    )
+    if os.path.exists(seg_npz_path):
         continue
 
-    try:
-        inputs = processor(images=img, return_tensors="pt")
-        inputs = {k: v.to(device) for k, v in inputs.items()}
+    # Load image
+    img = Image.open(os.path.join(IMG_DIR, fn)).convert("RGB")
 
-        with torch.no_grad():
-            outputs = model(**inputs)
+    # Move inputs to GPU
+    inputs = processor(images=img, return_tensors="pt")
+    inputs = {k: v.to(device) for k, v in inputs.items()}
 
-        seg_full = processor.post_process_semantic_segmentation(
-            outputs,
-            target_sizes=[img.size[::-1]]
-        )[0].cpu().numpy().astype(np.uint8)
+    with torch.no_grad():
+        outputs = model(**inputs)
 
-        mask3 = remap_to_three(seg_full)
+    seg_full = processor.post_process_semantic_segmentation(
+        outputs, target_sizes=[img.size[::-1]]
+    )[0].cpu().numpy().astype("uint8")
 
-        # -------------------------------------------------
-        # SAVE OUTPUTS (same structure as before)
-        # -------------------------------------------------
-        save_three_class_mask(CITY, image_id, mask3)
-        save_three_class_npz(CITY, image_id, mask3)
-        save_three_color(CITY, image_id, mask3)
+    # Remap to 3-class
+    mask3 = remap_to_three(seg_full)
 
-        if USE_QA_OVERLAY:
-            save_full_overlay(
-                CITY,
-                image_id,
-                np.array(img),
-                seg_full,
-                alpha=0.65,
-                soften_sigma=0.8
-            )
+    # Save outputs (OpenFacade-compatible)
+    save_three_class_mask(CITY, image_id, mask3)
+    save_three_class_npz(CITY, image_id, mask3)
+    save_three_color(CITY, image_id, mask3)
+
+    if USE_QA_OVERLAY:
+        save_full_overlay(
+            CITY,
+            image_id,
+            np.array(img),
+            seg_full,
+            alpha=0.65,
+            soften_sigma=0.8
+        )
 
     except Exception as e:
         print(f"[ERROR] Failed on {fn}: {e}")
