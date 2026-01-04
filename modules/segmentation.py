@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from typing import Optional
 import matplotlib.pyplot as plt
 from PIL import Image
 import modules.config as cfg  # single source of truth for paths
@@ -51,7 +52,7 @@ def colorize_full(mask_full: np.ndarray) -> np.ndarray:
     return FULL_PALETTE[idx]
 
 
-def save_full_color(city: str, image_id: str, mask_full: np.ndarray, out_root: str | None = None):
+def save_full_color(city: str, image_id: str, mask_full: np.ndarray, out_root: Optional[str] = None):
     if out_root is None:
         out_root = cfg.PROJECT_DIR
     out_dir = os.path.join(out_root, cfg.city_to_dir(city), "seg_full_vis")
@@ -71,7 +72,7 @@ def colorize_three(mask3: np.ndarray) -> np.ndarray:
     idx = np.clip(mask3, 0, 2)
     return PALETTE_3[idx]
     
-def save_three_color(city: str, image_id: str, mask3: np.ndarray, out_root: str | None = None):
+def save_three_color(city: str, image_id: str, mask3: np.ndarray, out_root: Optional[str] = None):
     """
     Save a human-friendly colorized 3-class PNG:
     1=building (gray), 2=sky (light blue), 3=ground (brown).
@@ -103,7 +104,7 @@ def overlay_fullcolor(rgb: np.ndarray, mask_full: np.ndarray, alpha=0.65, soften
     return np.clip(out, 0, 255).astype(np.uint8)
 
 def save_full_overlay(city: str, image_id: str, rgb: np.ndarray, mask_full: np.ndarray,
-                      alpha=0.65, soften_sigma=0.8, out_root: str | None = None):
+                      alpha=0.65, soften_sigma=0.8, out_root: Optional[str] = None):
     """Save a paper-like overlay using the full label palette."""
     if out_root is None:
         out_root = cfg.PROJECT_DIR
@@ -116,7 +117,7 @@ def save_full_overlay(city: str, image_id: str, rgb: np.ndarray, mask_full: np.n
 
 def _ensure_dir(p: str): os.makedirs(p, exist_ok=True)
 
-def save_three_class_mask(city: str, image_id: str, mask3: np.ndarray, out_root: str | None = None):
+def save_three_class_mask(city: str, image_id: str, mask3: np.ndarray, out_root: Optional[str] = None):
     if out_root is None:
         out_root = cfg.PROJECT_DIR
     out_dir = os.path.join(out_root, cfg.city_to_dir(city), "seg_3class")
@@ -125,7 +126,7 @@ def save_three_class_mask(city: str, image_id: str, mask3: np.ndarray, out_root:
     Image.fromarray(mask3, mode="L").save(path)
     return path
     
-def save_rgb(city: str, image_id: str, img_pil, out_root: str | None = None):
+def save_rgb(city: str, image_id: str, img_pil, out_root: Optional[str] = None):
     if out_root is None:
         out_root = cfg.PROJECT_DIR
     out_dir = os.path.join(out_root, cfg.city_to_dir(city), "save_rgb", "imgs")
@@ -134,7 +135,7 @@ def save_rgb(city: str, image_id: str, img_pil, out_root: str | None = None):
     img_pil.save(path, quality=95)
     return path
 
-def visualize_results(city, image_id, image, segmentation_3class, num, out_root: str | None = None):
+def visualize_results(city, image_id, image, segmentation_3class, num, out_root: Optional[str] = None):
     if out_root is None:
         out_root = cfg.PROJECT_DIR
     fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(9, 4), sharey=True)
@@ -145,14 +146,14 @@ def visualize_results(city, image_id, image, segmentation_3class, num, out_root:
     fig.savefig(os.path.join(out_dir, f"{image_id}-{num}.png"), bbox_inches='tight', dpi=110)
     plt.close(fig)
 
-def save_images(city, image_id, images, pickles, out_root: str | None = None):
+def save_images(city, image_id, images, pickles, out_root: Optional[str] = None):
     if out_root is None:
         out_root = cfg.PROJECT_DIR
     for i, (img, mask3) in enumerate(zip(images, pickles), start=1):
         img_np = np.array(img) if not isinstance(img, np.ndarray) else img
         visualize_results(city, image_id, img_np, mask3, i, out_root=out_root)
 
-def save_three_class_npz(city: str, image_id: str, mask3: np.ndarray, out_root: str | None = None):
+def save_three_class_npz(city: str, image_id: str, mask3: np.ndarray, out_root: Optional[str] = None):
     """
     Save the 3-class label as NPZ with key 'seg' (uint8), which SIHE's filesIO.load_seg_array reads.
     Path: <PROJECT>/<City>/seg/<image_id>_seg.npz
