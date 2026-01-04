@@ -1,7 +1,8 @@
 # seg.py
 import os
 import torch
-from PIL import Image
+import numpy as np
+from PIL import Image, ImageFile
 from tqdm import tqdm
 from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation
 
@@ -14,6 +15,9 @@ from modules.segmentation import (
 )
 import modules.config as cfg
 
+# -------------------------------------------------
+# GPU CHECK
+# -------------------------------------------------
 assert torch.cuda.is_available(), "❌ CUDA not available"
 device = torch.device("cuda")
 print("✅ Using GPU:", torch.cuda.get_device_name(0))
@@ -31,13 +35,7 @@ IMG_DIR = os.path.join(
     "imgs"
 )
 
-USE_QA_OVERLAY = False   # turn on later if needed
-
-# -------------------------------------------------
-# DEVICE
-# -------------------------------------------------
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"[INFO] Using device: {device}")
+USE_QA_OVERLAY = False   # enable later if needed
 
 # -------------------------------------------------
 # LOAD MODEL
@@ -48,60 +46,56 @@ processor = AutoImageProcessor.from_pretrained(
 
 model = Mask2FormerForUniversalSegmentation.from_pretrained(
     "facebook/mask2former-swin-large-cityscapes-semantic"
-).to(device)
-
-model.eval()
+).to(device).eval()
 
 # -------------------------------------------------
 # SEGMENTATION LOOP
 # -------------------------------------------------
 img_files = [f for f in os.listdir(IMG_DIR) if f.endswith(".jpg")]
-print(f"[INFO] Found {len(images)} images to segment")
+print(f"[INFO] Found {len(img_files)} images to segment")
 
 for fn in tqdm(img_files, desc="Segmenting images"):
     image_id = fn.replace(".jpg", "")
 
-    # 🔴 SKIP if already processed
     seg_npz_path = os.path.join(
         cfg.PROJECT_DIR,
         cfg.city_to_dir(CITY),
         "seg",
         f"{image_id}_seg.npz"
     )
+
+    # 🔴 Skip already processed images
     if os.path.exists(seg_npz_path):
         continue
 
-    # Load image
-    img = Image.open(os.path.join(IMG_DIR, fn)).convert("RGB")
+    try:
+        img = Image.open(os.path.join(IMG_DIR, fn)).convert("RGB")
 
-    # Move inputs to GPU
-    inputs = processor(images=img, return_tensors="pt")
-    inputs = {k: v.to(device) for k, v in inputs.items()}
+        inputs = processor(images=img, return_tensors="pt")
+        inputs = {k: v.to(device) for k, v in inputs.items()}
 
-    with torch.no_grad():
-        outputs = model(**inputs)
+        with torch.no_grad():
+            outputs = model(**inputs)
 
-    seg_full = processor.post_process_semantic_segmentation(
-        outputs, target_sizes=[img.size[::-1]]
-    )[0].cpu().numpy().astype("uint8")
+        seg_full = processor.post_process_semantic_segmentation(
+            outputs, target_sizes=[img.size[::-1]]
+        )[0].cpu().numpy().astype("uint8")
 
-    # Remap to 3-class
-    mask3 = remap_to_three(seg_full)
+        mask3 = remap_to_three(seg_full)
 
-    # Save outputs (OpenFacade-compatible)
-    save_three_class_mask(CITY, image_id, mask3)
-    save_three_class_npz(CITY, image_id, mask3)
-    save_three_color(CITY, image_id, mask3)
+        save_three_class_mask(CITY, image_id, mask3)
+        save_three_class_npz(CITY, image_id, mask3)
+        save_three_color(CITY, image_id, mask3)
 
-    if USE_QA_OVERLAY:
-        save_full_overlay(
-            CITY,
-            image_id,
-            np.array(img),
-            seg_full,
-            alpha=0.65,
-            soften_sigma=0.8
-        )
+        if USE_QA_OVERLAY:
+            save_full_overlay(
+                CITY,
+                image_id,
+                np.array(img),
+                seg_full,
+                alpha=0.65,
+                soften_sigma=0.8
+            )
 
     except Exception as e:
         print(f"[ERROR] Failed on {fn}: {e}")
