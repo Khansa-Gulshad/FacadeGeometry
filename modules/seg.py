@@ -5,6 +5,8 @@ import torch
 from PIL import Image, ImageFile
 from tqdm import tqdm
 from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation
+import torch
+
 
 import modules.config as cfg
 from modules.segmentation import (
@@ -14,6 +16,10 @@ from modules.segmentation import (
     save_three_color,
     save_full_overlay,
 )
+
+assert torch.cuda.is_available(), "❌ CUDA not available"
+device = torch.device("cuda")
+print("✅ Using GPU:", torch.cuda.get_device_name(0))
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
