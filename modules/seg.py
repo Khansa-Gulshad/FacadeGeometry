@@ -29,7 +29,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 # -------------------------------------------------
 CITY = "Gdańsk, Poland"
 IMG_DIR = os.path.join(
-    cfg.PROJECT_DIR,
+    "/workspace",
     cfg.city_to_dir(CITY),
     "save_rgb",
     "imgs"
