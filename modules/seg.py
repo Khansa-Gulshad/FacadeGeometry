@@ -45,8 +45,9 @@ processor = AutoImageProcessor.from_pretrained(
 )
 
 model = Mask2FormerForUniversalSegmentation.from_pretrained(
-    "facebook/mask2former-swin-large-cityscapes-semantic"
-).to(device).eval()
+    "facebook/mask2former-swin-large-cityscapes-semantic",
+    use_safetensors=False
+).to(device)
 
 # -------------------------------------------------
 # SEGMENTATION LOOP
