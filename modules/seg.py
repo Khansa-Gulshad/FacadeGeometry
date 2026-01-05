@@ -5,6 +5,7 @@ import numpy as np
 from PIL import Image, ImageFile
 from tqdm import tqdm
 from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation
+import modules.config as cfg
 
 # 🔴 OVERRIDE PROJECT DIR INSIDE CONTAINER
 cfg.PROJECT_DIR = "/mnt/host_scratch/khansa/Building-height-width-out"
@@ -16,7 +17,7 @@ from modules.segmentation import (
     save_three_color,
     save_full_overlay,
 )
-import modules.config as cfg
+
 
 # -------------------------------------------------
 # GPU CHECK
