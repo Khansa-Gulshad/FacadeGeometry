@@ -28,16 +28,18 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 # CONFIG
 # -------------------------------------------------
 CITY = "Gdańsk, Poland"
+
 IMG_DIR = os.path.join(
     "/workspace",
     cfg.city_to_dir(CITY),
     "save_rgb",
     "imgs"
 )
+
 OUT_ROOT = "/users/scratch1/khansa/Building-height-width-out"
 os.makedirs(OUT_ROOT, exist_ok=True)
 
-USE_QA_OVERLAY = False   # enable later if needed
+USE_QA_OVERLAY = False
 
 # -------------------------------------------------
 # LOAD MODEL
@@ -51,23 +53,25 @@ model = Mask2FormerForUniversalSegmentation.from_pretrained(
     use_safetensors=False
 ).to(device)
 
+model.eval()
+
 # -------------------------------------------------
 # SEGMENTATION LOOP
 # -------------------------------------------------
-img_files = [f for f in os.listdir(IMG_DIR) if f.endswith(".jpg")]
+img_files = sorted(f for f in os.listdir(IMG_DIR) if f.endswith(".jpg"))
 print(f"[INFO] Found {len(img_files)} images to segment")
 
 for fn in tqdm(img_files, desc="Segmenting images"):
     image_id = fn.replace(".jpg", "")
 
     seg_npz_path = os.path.join(
-        cfg.PROJECT_DIR,
+        OUT_ROOT,
         cfg.city_to_dir(CITY),
         "seg",
         f"{image_id}_seg.npz"
     )
 
-    # 🔴 Skip already processed images
+    # Skip already processed
     if os.path.exists(seg_npz_path):
         continue
 
@@ -92,15 +96,14 @@ for fn in tqdm(img_files, desc="Segmenting images"):
 
         if USE_QA_OVERLAY:
             save_full_overlay(
-            CITY,
-            image_id,
-            np.array(img),
-            seg_full,
-            alpha=0.65,
-            soften_sigma=0.8,
-            out_root=OUT_ROOT
+                CITY,
+                image_id,
+                np.array(img),
+                seg_full,
+                alpha=0.65,
+                soften_sigma=0.8,
+                out_root=OUT_ROOT
             )
-
 
     except Exception as e:
         print(f"[ERROR] Failed on {fn}: {e}")
