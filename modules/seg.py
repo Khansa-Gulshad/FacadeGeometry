@@ -34,6 +34,8 @@ IMG_DIR = os.path.join(
     "save_rgb",
     "imgs"
 )
+OUT_ROOT = "/users/scratch1/khansa/Building-height-width-out"
+os.makedirs(OUT_ROOT, exist_ok=True)
 
 USE_QA_OVERLAY = False   # enable later if needed
 
@@ -84,19 +86,21 @@ for fn in tqdm(img_files, desc="Segmenting images"):
 
         mask3 = remap_to_three(seg_full)
 
-        save_three_class_mask(CITY, image_id, mask3)
-        save_three_class_npz(CITY, image_id, mask3)
-        save_three_color(CITY, image_id, mask3)
+        save_three_class_mask(CITY, image_id, mask3, out_root=OUT_ROOT)
+        save_three_class_npz(CITY, image_id, mask3, out_root=OUT_ROOT)
+        save_three_color(CITY, image_id, mask3, out_root=OUT_ROOT)
 
         if USE_QA_OVERLAY:
             save_full_overlay(
-                CITY,
-                image_id,
-                np.array(img),
-                seg_full,
-                alpha=0.65,
-                soften_sigma=0.8
+            CITY,
+            image_id,
+            np.array(img),
+            seg_full,
+            alpha=0.65,
+            soften_sigma=0.8,
+            out_root=OUT_ROOT
             )
+
 
     except Exception as e:
         print(f"[ERROR] Failed on {fn}: {e}")
