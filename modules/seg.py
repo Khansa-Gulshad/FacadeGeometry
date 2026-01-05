@@ -8,6 +8,8 @@ from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation
 import modules.config as cfg
 
 # 🔴 OVERRIDE PROJECT DIR INSIDE CONTAINER
+cfg.PROJECT_DIR = "/workspace"
+
 from modules.segmentation import (
     remap_to_three,
     save_three_class_mask,
