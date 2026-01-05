@@ -8,8 +8,6 @@ from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation
 import modules.config as cfg
 
 # 🔴 OVERRIDE PROJECT DIR INSIDE CONTAINER
-cfg.PROJECT_DIR = "/mnt/host_scratch/khansa/Building-height-width-out"
-
 from modules.segmentation import (
     remap_to_three,
     save_three_class_mask,
@@ -40,7 +38,7 @@ IMG_DIR = os.path.join(
     "imgs"
 )
 
-OUT_ROOT = "/users/scratch1/khansa/Building-height-width-out"
+OUT_ROOT = "/workspace"
 
 USE_QA_OVERLAY = False
 
