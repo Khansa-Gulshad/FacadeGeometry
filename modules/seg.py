@@ -6,6 +6,9 @@ from PIL import Image, ImageFile
 from tqdm import tqdm
 from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation
 
+# 🔴 OVERRIDE PROJECT DIR INSIDE CONTAINER
+cfg.PROJECT_DIR = "/mnt/host_scratch/khansa/Building-height-width-out"
+
 from modules.segmentation import (
     remap_to_three,
     save_three_class_mask,
@@ -37,7 +40,6 @@ IMG_DIR = os.path.join(
 )
 
 OUT_ROOT = "/users/scratch1/khansa/Building-height-width-out"
-os.makedirs(OUT_ROOT, exist_ok=True)
 
 USE_QA_OVERLAY = False
 
