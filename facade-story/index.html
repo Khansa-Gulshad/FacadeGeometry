@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Façade-Level Green Infrastructure Assessment</title>
+  <style>
+    :root {
+      --green-dark:  #2d5a27;
+      --green-mid:   #4a8c3f;
+      --green-light: #7dba6f;
+      --green-pale:  #e8f5e3;
+      --stone:       #f4f1eb;
+      --ink:         #1a1a1a;
+      --muted:       #5a5a5a;
+      --border:      #d0d8cc;
+      --accent:      #c8e6c2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--stone);
+      color: var(--ink);
+      line-height: 1.7;
+    }
+
+    /* ── NAV ─────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--green-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 58px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    }
+
+    .nav-brand {
+      color: #fff;
+      font-size: .9rem;
+      font-family: 'Courier New', monospace;
+      letter-spacing: .05em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.6rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: #cce5c7;
+      text-decoration: none;
+      font-size: .82rem;
+      font-family: 'Courier New', monospace;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+
+    .nav-links a:hover { color: #fff; }
+
+    /* ── HERO ────────────────────────────────────── */
+    #hero {
+      background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 60%, var(--green-light) 100%);
+      color: #fff;
+      text-align: center;
+      padding: 6rem 2rem 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect width='60' height='60' fill='none'/%3E%3Cpath d='M0 30 Q15 10 30 30 Q45 50 60 30' stroke='rgba(255,255,255,.07)' stroke-width='1' fill='none'/%3E%3C/svg%3E") repeat;
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 20px;
+      padding: .3rem 1rem;
+      font-size: .75rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      font-family: 'Courier New', monospace;
+      margin-bottom: 1.4rem;
+    }
+
+    #hero h1 {
+      font-size: clamp(1.8rem, 4vw, 3.2rem);
+      font-weight: 400;
+      line-height: 1.25;
+      max-width: 760px;
+      margin: 0 auto 1.2rem;
+      letter-spacing: -.01em;
+    }
+
+    #hero p.subtitle {
+      font-size: 1.05rem;
+      opacity: .85;
+      max-width: 580px;
+      margin: 0 auto 2.2rem;
+      font-style: italic;
+    }
+
+    .hero-meta {
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      font-size: .82rem;
+      font-family: 'Courier New', monospace;
+      opacity: .8;
+    }
+
+    .hero-meta span::before { content: '▸ '; }
+
+    /* ── SECTION SHELL ───────────────────────────── */
+    section {
+      padding: 4rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    section.full-bleed {
+      max-width: 100%;
+      padding: 4rem 0;
+    }
+
+    h2.section-title {
+      font-size: 1.45rem;
+      font-weight: 400;
+      color: var(--green-dark);
+      border-left: 4px solid var(--green-light);
+      padding-left: .9rem;
+      margin-bottom: 2rem;
+      letter-spacing: .02em;
+    }
+
+    /* ── ABOUT ───────────────────────────────────── */
+    #about .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 700px) { #about .about-grid { grid-template-columns: 1fr; } }
+
+    .about-text p { color: var(--muted); margin-bottom: 1rem; font-size: .97rem; }
+
+    .about-highlights {
+      background: var(--green-pale);
+      border-radius: 10px;
+      padding: 1.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .highlight-item {
+      display: flex;
+      gap: .8rem;
+      align-items: flex-start;
+    }
+
+    .highlight-icon {
+      width: 34px;
+      height: 34px;
+      min-width: 34px;
+      background: var(--green-mid);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .highlight-item h4 { font-size: .88rem; margin-bottom: .15rem; color: var(--green-dark); }
+    .highlight-item p  { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+
+    /* ── METRICS STRIP ───────────────────────────── */
+    #metrics {
+      background: var(--green-dark);
+      color: #fff;
+      padding: 3rem 2rem;
+      max-width: 100%;
+    }
+
+    .metrics-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 2rem;
+      text-align: center;
+    }
+
+    .metric-card { padding: 1rem; }
+
+    .metric-value {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--green-light);
+      font-family: 'Courier New', monospace;
+      display: block;
+    }
+
+    .metric-label {
+      font-size: .78rem;
+      opacity: .75;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ── METHODOLOGY ─────────────────────────────── */
+    #methodology .pipeline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      position: relative;
+    }
+
+    .pipeline-step {
+      flex: 1 1 180px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.4rem;
+      position: relative;
+      margin: .4rem;
+      transition: box-shadow .2s, transform .2s;
+      cursor: default;
+    }
+
+    .pipeline-step:hover {
+      box-shadow: 0 6px 20px rgba(74,140,63,.18);
+      transform: translateY(-3px);
+    }
+
+    .step-number {
+      display: inline-block;
+      background: var(--green-mid);
+      color: #fff;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      line-height: 26px;
+      text-align: center;
+      font-size: .75rem;
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      margin-bottom: .7rem;
+    }
+
+    .pipeline-step h4 { font-size: .9rem; color: var(--green-dark); margin-bottom: .4rem; }
+    .pipeline-step p  { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+
+    .step-tag {
+      display: inline-block;
+      margin-top: .7rem;
+      background: var(--accent);
+      color: var(--green-dark);
+      border-radius: 4px;
+      padding: .15rem .5rem;
+      font-size: .72rem;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ── RESULTS TABS ────────────────────────────── */
+    #results .tab-bar {
+      display: flex;
+      gap: .4rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.4rem;
+    }
+
+    .tab-btn {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px 6px 0 0;
+      padding: .5rem 1.1rem;
+      font-size: .8rem;
+      font-family: 'Courier New', monospace;
+      cursor: pointer;
+      color: var(--muted);
+      transition: background .2s, color .2s;
+    }
+
+    .tab-btn.active {
+      background: var(--green-pale);
+      border-bottom-color: var(--green-pale);
+      color: var(--green-dark);
+      font-weight: 700;
+    }
+
+    .tab-panel {
+      display: none;
+      background: var(--green-pale);
+      border: 1px solid var(--border);
+      border-radius: 0 8px 8px 8px;
+      padding: 1.8rem;
+    }
+
+    .tab-panel.active { display: block; }
+
+    .tab-panel h4 { color: var(--green-dark); margin-bottom: .8rem; font-size: 1rem; }
+    .tab-panel p  { color: var(--muted); font-size: .9rem; margin-bottom: .8rem; }
+
+    .result-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-top: .8rem;
+    }
+
+    .chip {
+      background: #fff;
+      border: 1px solid var(--green-light);
+      border-radius: 20px;
+      padding: .2rem .8rem;
+      font-size: .75rem;
+      color: var(--green-dark);
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ── INTERACTIVE MAP PLACEHOLDER ─────────────── */
+    #map-section {
+      background: #fff;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 4rem 2rem;
+    }
+
+    .map-inner { max-width: 1100px; margin: 0 auto; }
+
+    .map-frame {
+      position: relative;
+      background: linear-gradient(160deg, #d6eecf 0%, #b8ddb0 40%, #8fbd84 100%);
+      border-radius: 12px;
+      overflow: hidden;
+      height: 380px;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: filter .2s;
+    }
+
+    .map-frame:hover { filter: brightness(.97); }
+
+    /* SVG facade grid decoration */
+    .map-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: .35;
+    }
+
+    .map-overlay {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .map-overlay h3 { font-size: 1.15rem; color: var(--green-dark); margin-bottom: .5rem; }
+    .map-overlay p  { font-size: .82rem; color: var(--muted); margin-bottom: 1rem; }
+
+    .map-btn {
+      display: inline-block;
+      background: var(--green-dark);
+      color: #fff;
+      padding: .55rem 1.4rem;
+      border-radius: 6px;
+      font-size: .82rem;
+      font-family: 'Courier New', monospace;
+      cursor: pointer;
+      border: none;
+      letter-spacing: .04em;
+      transition: background .2s;
+    }
+
+    .map-btn:hover { background: var(--green-mid); }
+
+    /* tooltip dot legend */
+    .legend {
+      display: flex;
+      gap: 1.4rem;
+      flex-wrap: wrap;
+      margin-top: 1.2rem;
+      font-size: .78rem;
+      font-family: 'Courier New', monospace;
+      color: var(--muted);
+    }
+
+    .legend-item { display: flex; align-items: center; gap: .4rem; }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* ── FINDINGS CARDS ──────────────────────────── */
+    #findings .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .finding-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.4rem;
+      border-top: 3px solid var(--green-light);
+      transition: box-shadow .2s;
+    }
+
+    .finding-card:hover { box-shadow: 0 4px 16px rgba(74,140,63,.14); }
+
+    .finding-card .icon { font-size: 1.6rem; margin-bottom: .7rem; }
+    .finding-card h4 { font-size: .92rem; color: var(--green-dark); margin-bottom: .5rem; }
+    .finding-card p  { font-size: .82rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── COLLAPSIBLE FAQ ─────────────────────────── */
+    #faq .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .faq-question {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      padding: 1rem 0;
+      font-size: .95rem;
+      font-family: 'Georgia', serif;
+      color: var(--ink);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .faq-question:hover { color: var(--green-dark); }
+
+    .faq-chevron {
+      color: var(--green-mid);
+      font-size: 1rem;
+      transition: transform .25s;
+      flex-shrink: 0;
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .35s ease, padding .2s;
+      font-size: .88rem;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .faq-item.open .faq-answer { max-height: 400px; padding-bottom: 1rem; }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+
+    /* ── TEAM ────────────────────────────────────── */
+    #team .team-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+    }
+
+    .team-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1 1 220px;
+    }
+
+    .avatar {
+      width: 46px;
+      height: 46px;
+      min-width: 46px;
+      background: var(--green-pale);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      border: 2px solid var(--green-light);
+    }
+
+    .team-info h4 { font-size: .88rem; color: var(--green-dark); }
+    .team-info p  { font-size: .78rem; color: var(--muted); font-style: italic; }
+
+    /* ── FOOTER ──────────────────────────────────── */
+    footer {
+      background: var(--green-dark);
+      color: rgba(255,255,255,.7);
+      text-align: center;
+      padding: 2.5rem 2rem;
+      font-size: .78rem;
+      font-family: 'Courier New', monospace;
+      letter-spacing: .05em;
+    }
+
+    footer a { color: var(--green-light); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── SCROLL REVEAL ───────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .5s ease, transform .5s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVIGATION ─────────────────────────────── -->
+<nav>
+  <span class="nav-brand">FGI // Assessment</span>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#methodology">Method</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#findings">Findings</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#team">Team</a></li>
+  </ul>
+</nav>
+
+<!-- ── HERO ───────────────────────────────────── -->
+<header id="hero">
+  <div class="hero-tag">Research Portfolio</div>
+  <h1>Façade-Level Green Infrastructure Assessment</h1>
+  <p class="subtitle">
+    Mapping, quantifying, and evaluating vertical green systems across urban building envelopes
+  </p>
+  <div class="hero-meta">
+    <span>Urban Ecology &amp; Building Science</span>
+    <span>Computational Geometry</span>
+    <span>Environmental Performance</span>
+  </div>
+</header>
+
+<!-- ── KEY METRICS ────────────────────────────── -->
+<div id="metrics">
+  <div class="metrics-inner">
+    <div class="metric-card reveal">
+      <span class="metric-value" data-target="1240">0</span>
+      <span class="metric-label">Façades Analysed</span>
+    </div>
+    <div class="metric-card reveal">
+      <span class="metric-value" data-target="38">0</span>
+      <span class="metric-label">City Blocks</span>
+    </div>
+    <div class="metric-card reveal">
+      <span class="metric-value" data-target="94">0</span>
+      <span class="metric-label">% Automated Extraction</span>
+    </div>
+    <div class="metric-card reveal">
+      <span class="metric-value" data-target="6">0</span>
+      <span class="metric-label">GI Typologies</span>
+    </div>
+    <div class="metric-card reveal">
+      <span class="metric-value" data-target="17">0</span>
+      <span class="metric-label">Performance Indicators</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── ABOUT ──────────────────────────────────── -->
+<section id="about">
+  <h2 class="section-title">About the Project</h2>
+  <div class="about-grid">
+    <div class="about-text reveal">
+      <p>
+        This research develops a computational framework for detecting, classifying, and evaluating
+        <strong>green infrastructure (GI)</strong> installed on building façades at the urban scale.
+        Rather than relying on manual surveys or coarse satellite imagery, the pipeline fuses
+        street-level photogrammetry, semantic segmentation, and 3-D building geometry to produce
+        façade-resolved GI inventories.
+      </p>
+      <p>
+        Outcomes inform urban heat island mitigation strategies, biodiversity corridors, stormwater
+        management planning, and energy-efficiency retrofits — connecting building-skin vegetation
+        directly to city-wide environmental targets.
+      </p>
+      <p>
+        The methodology is replicable across any city where point-cloud data or photographic surveys
+        are available, and all core tools are released as open-source software.
+      </p>
+    </div>
+    <div class="about-highlights reveal">
+      <div class="highlight-item">
+        <div class="highlight-icon">🌿</div>
+        <div>
+          <h4>Green Wall &amp; Roof Detection</h4>
+          <p>Automated identification of living walls, climbing plants, planter boxes, and modular systems.</p>
+        </div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-icon">📐</div>
+        <div>
+          <h4>Geometry-Aware Analysis</h4>
+          <p>GI coverage computed per façade segment accounting for orientation, shading, and accessibility.</p>
+        </div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-icon">🛰️</div>
+        <div>
+          <h4>Multi-Source Data Fusion</h4>
+          <p>Street-view imagery, LiDAR point clouds, and OpenStreetMap footprints combined in a unified pipeline.</p>
+        </div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-icon">📊</div>
+        <div>
+          <h4>Performance Benchmarking</h4>
+          <p>Each façade scored across thermal, ecological, and hydrological performance metrics.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── METHODOLOGY ────────────────────────────── -->
+<section id="methodology">
+  <h2 class="section-title">Methodology Pipeline</h2>
+  <div class="pipeline">
+    <div class="pipeline-step reveal">
+      <div class="step-number">1</div>
+      <h4>Data Acquisition</h4>
+      <p>Street-level panoramic imagery collected alongside building footprints and height data from open municipal datasets.</p>
+      <span class="step-tag">OSM · LiDAR · GSV</span>
+    </div>
+    <div class="pipeline-step reveal">
+      <div class="step-number">2</div>
+      <h4>Façade Segmentation</h4>
+      <p>Deep-learning semantic segmentation isolates façade planes, windows, doors, and vegetation regions per image.</p>
+      <span class="step-tag">CNN · DeepLabV3+</span>
+    </div>
+    <div class="pipeline-step reveal">
+      <div class="step-number">3</div>
+      <h4>3-D Projection</h4>
+      <p>Detected GI regions back-projected onto georeferenced 3-D building meshes to compute real-world coverage areas.</p>
+      <span class="step-tag">Raycasting · PCL</span>
+    </div>
+    <div class="pipeline-step reveal">
+      <div class="step-number">4</div>
+      <h4>Typology Classification</h4>
+      <p>Six GI typologies assigned via a rule-based classifier combining visual texture features and geometry context.</p>
+      <span class="step-tag">RF Classifier</span>
+    </div>
+    <div class="pipeline-step reveal">
+      <div class="step-number">5</div>
+      <h4>Performance Scoring</h4>
+      <p>Each façade segment scored against thermal regulation, biodiversity potential, and stormwater indices.</p>
+      <span class="step-tag">Multi-criteria</span>
+    </div>
+    <div class="pipeline-step reveal">
+      <div class="step-number">6</div>
+      <h4>Urban Aggregation</h4>
+      <p>Façade-level results aggregated to block and district scales to support planning and policy decisions.</p>
+      <span class="step-tag">GIS · PostGIS</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── INTERACTIVE MAP ────────────────────────── -->
+<div id="map-section">
+  <div class="map-inner">
+    <h2 class="section-title">Spatial Coverage</h2>
+    <div class="map-frame reveal" onclick="mapClick(this)">
+      <!-- SVG decorative facade grid -->
+      <svg class="map-svg" viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        <!-- building outlines -->
+        <rect x="30"  y="180" width="80"  height="160" fill="rgba(45,90,39,.15)" stroke="rgba(45,90,39,.4)" stroke-width="1.2"/>
+        <rect x="120" y="140" width="120" height="200" fill="rgba(45,90,39,.12)" stroke="rgba(45,90,39,.4)" stroke-width="1.2"/>
+        <rect x="250" y="160" width="70"  height="180" fill="rgba(45,90,39,.18)" stroke="rgba(45,90,39,.4)" stroke-width="1.2"/>
+        <rect x="330" y="120" width="100" height="220" fill="rgba(45,90,39,.1)"  stroke="rgba(45,90,39,.4)" stroke-width="1.2"/>
+        <rect x="440" y="150" width="90"  height="190" fill="rgba(45,90,39,.2)"  stroke="rgba(45,90,39,.4)" stroke-width="1.2"/>
+        <rect x="540" y="130" width="130" height="210" fill="rgba(45,90,39,.13)" stroke="rgba(45,90,39,.4)" stroke-width="1.2"/>
+        <rect x="680" y="170" width="80"  height="170" fill="rgba(45,90,39,.16)" stroke="rgba(45,90,39,.4)" stroke-width="1.2"/>
+        <rect x="770" y="145" width="100" height="195" fill="rgba(45,90,39,.11)" stroke="rgba(45,90,39,.4)" stroke-width="1.2"/>
+        <!-- GI highlight patches -->
+        <rect x="30"  y="180" width="80"  height="50"  fill="rgba(125,186,111,.45)"/>
+        <rect x="250" y="160" width="70"  height="80"  fill="rgba(125,186,111,.5)"/>
+        <rect x="440" y="150" width="90"  height="60"  fill="rgba(125,186,111,.4)"/>
+        <rect x="540" y="130" width="130" height="40"  fill="rgba(125,186,111,.35)"/>
+        <!-- road lines -->
+        <line x1="0" y1="340" x2="900" y2="340" stroke="rgba(255,255,255,.4)" stroke-width="3"/>
+        <line x1="220" y1="0" x2="220" y2="380" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
+        <line x1="630" y1="0" x2="630" y2="380" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
+        <!-- dots for data points -->
+        <circle cx="70"  cy="205" r="5" fill="#ff6b35" opacity=".85"/>
+        <circle cx="285" cy="200" r="5" fill="#ff6b35" opacity=".85"/>
+        <circle cx="485" cy="180" r="5" fill="#ff6b35" opacity=".85"/>
+        <circle cx="605" cy="150" r="5" fill="#4CAF50" opacity=".9"/>
+        <circle cx="180" cy="240" r="5" fill="#4CAF50" opacity=".9"/>
+        <circle cx="720" cy="255" r="5" fill="#4CAF50" opacity=".9"/>
+      </svg>
+      <div class="map-overlay">
+        <h3>Study Area — Urban Transect</h3>
+        <p>Click to explore façade-level GI distribution</p>
+        <button class="map-btn" onclick="event.stopPropagation(); mapClick(document.querySelector('.map-frame'))">
+          View Interactive Map
+        </button>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#ff6b35"></div>High GI density</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4CAF50"></div>Moderate GI density</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#aaa"></div>Low / no GI</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7dba6f; opacity:.7"></div>GI coverage patch</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── RESULTS TABS ────────────────────────────── -->
+<section id="results">
+  <h2 class="section-title">Results</h2>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('coverage')">Coverage</button>
+    <button class="tab-btn" onclick="switchTab('typology')">Typology Distribution</button>
+    <button class="tab-btn" onclick="switchTab('performance')">Performance</button>
+    <button class="tab-btn" onclick="switchTab('validation')">Validation</button>
+  </div>
+
+  <div id="tab-coverage" class="tab-panel active">
+    <h4>Façade Green Infrastructure Coverage</h4>
+    <p>
+      Across the 1,240 façades surveyed, <strong>22.4 %</strong> carry some form of green
+      infrastructure. Coverage density peaks on south- and east-facing orientations and is
+      strongly correlated with pre-1960 building stock. Street-facing frontages account for
+      68 % of total detected GI area.
+    </p>
+    <div class="result-chips">
+      <span class="chip">South-facing: 31 %</span>
+      <span class="chip">East-facing: 27 %</span>
+      <span class="chip">West-facing: 19 %</span>
+      <span class="chip">North-facing: 8 %</span>
+      <span class="chip">Mean coverage: 22.4 %</span>
+    </div>
+  </div>
+
+  <div id="tab-typology" class="tab-panel">
+    <h4>Green Infrastructure Typology Distribution</h4>
+    <p>
+      Six distinct typologies were identified. Climbing plants on masonry represent the most
+      prevalent system (41 %), followed by pot/planter arrangements (24 %) and modular living
+      wall panels (18 %). Purpose-built green façade systems remain rare (&lt; 5 %).
+    </p>
+    <div class="result-chips">
+      <span class="chip">Climbing plants: 41 %</span>
+      <span class="chip">Planters/pots: 24 %</span>
+      <span class="chip">Living wall modules: 18 %</span>
+      <span class="chip">Trellis systems: 12 %</span>
+      <span class="chip">Pergola/canopy: 5 %</span>
+      <span class="chip">Engineered GF: 4 %</span>
+    </div>
+  </div>
+
+  <div id="tab-performance" class="tab-panel">
+    <h4>Environmental Performance Scores</h4>
+    <p>
+      Multi-criteria scoring reveals that modular living wall systems consistently outperform
+      opportunistic climbing vegetation on thermal and stormwater metrics, despite their lower
+      prevalence. Biodiversity indices favour climbing species with complex canopy structure.
+    </p>
+    <div class="result-chips">
+      <span class="chip">Thermal score avg: 0.61</span>
+      <span class="chip">Biodiversity avg: 0.54</span>
+      <span class="chip">Stormwater avg: 0.43</span>
+      <span class="chip">Aesthetic avg: 0.72</span>
+    </div>
+  </div>
+
+  <div id="tab-validation" class="tab-panel">
+    <h4>Accuracy &amp; Validation</h4>
+    <p>
+      Manual ground-truth surveys on a stratified sample of 120 façades confirm an overall
+      detection accuracy of <strong>91.3 %</strong> (F1), with typology classification reaching
+      87.6 % on the six-class task. False positives are predominantly caused by potted trees at
+      ground level misidentified as wall-mounted GI.
+    </p>
+    <div class="result-chips">
+      <span class="chip">Detection F1: 91.3 %</span>
+      <span class="chip">Classification F1: 87.6 %</span>
+      <span class="chip">IoU: 0.84</span>
+      <span class="chip">Sample n=120</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── KEY FINDINGS ───────────────────────────── -->
+<section id="findings">
+  <h2 class="section-title">Key Findings</h2>
+  <div class="cards-grid">
+    <div class="finding-card reveal">
+      <div class="icon">🌡️</div>
+      <h4>Thermal Buffering</h4>
+      <p>Façades with &gt; 40 % GI coverage exhibit surface temperature reductions of 3–6 °C during summer peak hours compared to bare masonry.</p>
+    </div>
+    <div class="finding-card reveal">
+      <div class="icon">🐝</div>
+      <h4>Biodiversity Corridors</h4>
+      <p>Contiguous GI-covered façades along street networks form potential ecological stepping stones connecting park habitats up to 2.3 km apart.</p>
+    </div>
+    <div class="finding-card reveal">
+      <div class="icon">💧</div>
+      <h4>Stormwater Retention</h4>
+      <p>Living wall systems retain an estimated 28–55 L/m² per rainfall event, meaningfully reducing peak runoff in dense urban blocks.</p>
+    </div>
+    <div class="finding-card reveal">
+      <div class="icon">⚡</div>
+      <h4>Energy Implications</h4>
+      <p>Thermal buffering data extrapolated to annual cooling loads suggests 7–12 % reduction potential for GI-dense façades in temperate climates.</p>
+    </div>
+    <div class="finding-card reveal">
+      <div class="icon">📍</div>
+      <h4>Spatial Inequality</h4>
+      <p>GI coverage is 3× higher in affluent residential neighbourhoods vs. commercial/industrial zones, highlighting equity gaps in urban greening.</p>
+    </div>
+    <div class="finding-card reveal">
+      <div class="icon">🔧</div>
+      <h4>Retrofit Potential</h4>
+      <p>Over 60 % of GI-free façades meet structural and orientation criteria for low-intervention greening with climbing plant support systems.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ────────────────────────────────────── -->
+<section id="faq">
+  <h2 class="section-title">Frequently Asked Questions</h2>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="toggleFaq(this)">
+      What distinguishes this approach from satellite-based urban green assessments?
+      <span class="faq-chevron">▼</span>
+    </button>
+    <div class="faq-answer">
+      Satellite and aerial imagery capture horizontal green surfaces (roofs, parks, tree canopies) well,
+      but vertical surfaces — building façades — are largely invisible from above. This framework
+      operates on street-level and oblique imagery combined with 3-D building geometry, giving
+      façade-resolved measurements that are simply not accessible from overhead data sources.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="toggleFaq(this)">
+      How scalable is the pipeline to other cities?
+      <span class="faq-chevron">▼</span>
+    </button>
+    <div class="faq-answer">
+      The core pipeline requires street-level imagery (Google Street View, Mapillary, or custom surveys),
+      building footprints (available from OpenStreetMap for most major cities), and optional height data.
+      The deep-learning segmentation model was trained on diverse urban scenes and generalises well
+      across European and North American building stock without retraining.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="toggleFaq(this)">
+      Are the tools and datasets publicly available?
+      <span class="faq-chevron">▼</span>
+    </button>
+    <div class="faq-answer">
+      Yes. The segmentation model weights, geometry projection scripts, and performance scoring
+      framework are released under MIT licence. Derived spatial datasets for the study area are
+      released under ODbL. Raw street-view imagery remains subject to provider licensing terms.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="toggleFaq(this)">
+      How were the six GI typologies defined?
+      <span class="faq-chevron">▼</span>
+    </button>
+    <div class="faq-answer">
+      The typology schema was derived from a literature review of European green façade standards
+      (including BS 8545, EFB guidelines, and LEED v4 criteria) combined with an inductive
+      classification of 3,000 manually annotated façade images. The six classes balance
+      operational distinctiveness with detection feasibility given available image resolution.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question" onclick="toggleFaq(this)">
+      What are the main limitations of the current methodology?
+      <span class="faq-chevron">▼</span>
+    </button>
+    <div class="faq-answer">
+      Known limitations include: (1) temporal snapshot — street imagery captures GI state at one
+      point in time, missing seasonal variation; (2) occlusion — parked vehicles and street
+      furniture obstruct up to 18 % of façade area; (3) imagery resolution constrains detection
+      of small-scale features such as individual planter pots below ~20 cm. Future work will
+      address seasonal multi-temporal analysis and drone-based close-range data collection.
+    </div>
+  </div>
+</section>
+
+<!-- ── TEAM ───────────────────────────────────── -->
+<section id="team">
+  <h2 class="section-title">Research Team</h2>
+  <div class="team-grid">
+    <div class="team-card reveal">
+      <div class="avatar">👩‍🔬</div>
+      <div class="team-info">
+        <h4>Principal Investigator</h4>
+        <p>Urban Ecology &amp; Landscape Architecture</p>
+      </div>
+    </div>
+    <div class="team-card reveal">
+      <div class="avatar">👨‍💻</div>
+      <div class="team-info">
+        <h4>Computational Geographer</h4>
+        <p>GIS, Remote Sensing &amp; 3-D Geometry</p>
+      </div>
+    </div>
+    <div class="team-card reveal">
+      <div class="avatar">👩‍💻</div>
+      <div class="team-info">
+        <h4>Machine Learning Engineer</h4>
+        <p>Computer Vision &amp; Semantic Segmentation</p>
+      </div>
+    </div>
+    <div class="team-card reveal">
+      <div class="avatar">👨‍🏫</div>
+      <div class="team-info">
+        <h4>Environmental Engineer</h4>
+        <p>Thermal Performance &amp; Hydrological Modelling</p>
+      </div>
+    </div>
+    <div class="team-card reveal">
+      <div class="avatar">👩‍🏫</div>
+      <div class="team-info">
+        <h4>Urban Planner</h4>
+        <p>Policy Translation &amp; Stakeholder Engagement</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────── -->
+<footer>
+  <p>Façade-Level Green Infrastructure Assessment &nbsp;·&nbsp; Research Portfolio</p>
+  <p style="margin-top:.5rem; opacity:.6;">
+    Data released under <a href="#">ODbL</a> &nbsp;·&nbsp; Code under <a href="#">MIT</a> &nbsp;·&nbsp; 2026
+  </p>
+</footer>
+
+<!-- ── SCRIPTS ────────────────────────────────── -->
+<script>
+  /* Scroll reveal */
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  /* Animated counters */
+  function animateCounter(el, target) {
+    const duration = 1600;
+    const start = performance.now();
+    const update = now => {
+      const t = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      el.textContent = Math.round(ease * target).toLocaleString();
+      if (t < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+  }
+
+  const metricObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        animateCounter(el, +el.dataset.target);
+        metricObs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('[data-target]').forEach(el => metricObs.observe(el));
+
+  /* Tab switching */
+  function switchTab(id) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  /* FAQ accordion */
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  /* Map click */
+  function mapClick(el) {
+    el.style.filter = 'brightness(.93)';
+    setTimeout(() => { el.style.filter = ''; }, 180);
+    /* In a real deployment, initialise Leaflet/Mapbox here */
+    console.info('Map interaction — integrate your tile layer here.');
+  }
+</script>
+</body>
+</html>
