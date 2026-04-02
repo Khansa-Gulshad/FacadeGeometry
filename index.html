@@ -622,6 +622,15 @@
       font-weight: 600;
       color: var(--accent);
       margin-bottom: .3rem;
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+    }
+    .modal-step h3 img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      flex-shrink: 0;
     }
     .modal-step p {
       font-size: .84rem;
@@ -982,27 +991,27 @@
     <p>This workflow estimates building façade dimensions from street-view images using deep learning and geometric reconstruction.</p>
 
     <div class="modal-step">
-      <h3>Step 1 — Image segmentation</h3>
+      <h3><img src="icons/segmentation.png" alt=""/>Step 1 — Image segmentation</h3>
       <p>Building façades are extracted using Mask2Former, isolating façade regions from sky, roads, and other elements.</p>
     </div>
 
     <div class="modal-step">
-      <h3>Step 2 — Vanishing point detection</h3>
+      <h3><img src="icons/vanishing_point.png" alt=""/>Step 2 — Vanishing point detection</h3>
       <p>NeurVPS identifies the three main vanishing points, defining scene geometry.</p>
     </div>
 
     <div class="modal-step">
-      <h3>Step 3 — Line detection</h3>
+      <h3><img src="icons/lcnn.png" alt=""/>Step 3 — Line detection</h3>
       <p>LCNN detects structural edges (vertical and horizontal lines) of buildings.</p>
     </div>
 
     <div class="modal-step">
-      <h3>Step 4 — Height estimation</h3>
+      <h3><img src="icons/height.png" alt=""/>Step 4 — Height estimation</h3>
       <p>Using single-view metrology and known camera height, façade height is calculated from image geometry.</p>
     </div>
 
     <div class="modal-step">
-      <h3>Step 5 — Rectification &amp; width</h3>
+      <h3><img src="icons/width.png" alt=""/>Step 5 — Rectification &amp; width</h3>
       <p>Perspective distortion is removed using vanishing points, allowing accurate façade width and area estimation.</p>
     </div>
   </div>
