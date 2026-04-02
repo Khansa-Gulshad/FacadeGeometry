@@ -698,20 +698,20 @@
   <div class="ss-wrap">
 
     <div class="ss-counter">
-      <span id="cur">1</span>&thinsp;/&thinsp;13
+      <span id="cur">1</span>&thinsp;/&thinsp;12
     </div>
 
     <!-- ─── Slide 1 — Façade image ─── -->
     <div class="slide active" data-slide="1">
       <div class="s-inner">
-        <span class="s-label">Façade — View 1</span>
+        <span class="s-label">Step 1</span>
 
         <div class="s-visual">
           <img src="images/facade.jpg" alt="Façade image" loading="lazy"/>
         </div>
 
         <div class="s-caption">
-          <p>Street-view façade used for geometry estimation</p>
+          <p>Challenges</p>
         </div>
       </div>
     </div>
@@ -719,47 +719,22 @@
     <!-- ─── Slide 2 — Façade image 2 ─── -->
     <div class="slide" data-slide="2">
       <div class="s-inner">
-        <span class="s-label">Façade — View 2</span>
+        <span class="s-label">Step 2</span>
 
         <div class="s-visual">
           <img src="images/facade2.jpg" alt="Façade image 2" loading="lazy"/>
         </div>
 
         <div class="s-caption">
-          <p>Alternative façade view</p>
+          <p>This project proposes a street-level, AI-based approach to estimate façade greening potential.</p>
         </div>
       </div>
     </div>
 
-    <!-- ─── Slide 3 — Intro ─── -->
+    <!-- ─── Slide 3 — Selected building ─── -->
     <div class="slide" data-slide="3">
       <div class="s-inner">
-        <span class="s-label">Introduction</span>
-
-        <div id="intro-visual">
-          <canvas id="intro-canvas"></canvas>
-          <div class="intro-label">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
-                 stroke="rgba(63,185,80,.35)" stroke-width="1.2">
-              <rect x="3" y="3" width="18" height="18" rx="2"/>
-              <path d="M3 9h18M9 21V9"/>
-            </svg>
-            <span style="font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">
-              Computer Vision Pipeline
-            </span>
-          </div>
-        </div>
-
-        <div class="s-caption">
-          <p>Let's see how façade geometry is estimated from street images.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- ─── Slide 4 — Selected building ─── -->
-    <div class="slide" data-slide="4">
-      <div class="s-inner">
-        <span class="s-label">Step 2 — Building selection</span>
+        <span class="s-label">Step 3 — Building selection</span>
 
         <div class="s-visual" style="max-height:none; padding:0;">
           <div id="map-detail" class="map-pane"></div>
@@ -771,10 +746,10 @@
       </div>
     </div>
 
-    <!-- ─── Slide 5 — Street view image ─── -->
-    <div class="slide" data-slide="5">
+    <!-- ─── Slide 4 — Street view image ─── -->
+    <div class="slide" data-slide="4">
       <div class="s-inner">
-        <span class="s-label">Step 3 — Input image</span>
+        <span class="s-label">Step 4 — Input image</span>
 
         <div class="s-visual">
           <img src="images/street_view_image.jpg" alt="Street-view image of building" loading="lazy"/>
@@ -786,10 +761,10 @@
       </div>
     </div>
 
-    <!-- ─── Slide 6 — Segmentation ─── -->
-    <div class="slide" data-slide="6">
+    <!-- ─── Slide 5 — Segmentation ─── -->
+    <div class="slide" data-slide="5">
       <div class="s-inner">
-        <span class="s-label">Step 4 — Segmentation (Mask2Former)</span>
+        <span class="s-label">Step 5 — Segmentation (Mask2Former)</span>
 
         <div class="s-visual">
           <img src="images/segmentation.png" alt="Façade segmentation" loading="lazy"/>
@@ -801,10 +776,10 @@
       </div>
     </div>
 
-    <!-- ─── Slide 7 — Segmentation overlay ─── -->
-    <div class="slide" data-slide="7">
+    <!-- ─── Slide 6 — Segmentation overlay ─── -->
+    <div class="slide" data-slide="6">
       <div class="s-inner">
-        <span class="s-label">Step 4b — Segmentation overlay</span>
+        <span class="s-label">Step 6 — Segmentation overlay</span>
 
         <div class="s-visual">
           <img src="images/segmentation_overlay.jpg" alt="Segmentation mask overlaid on building" loading="lazy"/>
@@ -816,10 +791,10 @@
       </div>
     </div>
 
-    <!-- ─── Slide 8 — Vanishing points ─── -->
-    <div class="slide" data-slide="8">
+    <!-- ─── Slide 7 — Vanishing points ─── -->
+    <div class="slide" data-slide="7">
       <div class="s-inner">
-        <span class="s-label">Step 5 — Vanishing points (NeurVPS)</span>
+        <span class="s-label">Step 7 — Vanishing points (NeurVPS)</span>
 
         <div class="s-visual">
           <img src="images/vanishing_points.png" alt="Vanishing point detection" loading="lazy"/>
@@ -831,10 +806,10 @@
       </div>
     </div>
 
-    <!-- ─── Slide 9 — Line detection ─── -->
-    <div class="slide" data-slide="9">
+    <!-- ─── Slide 8 — Line detection ─── -->
+    <div class="slide" data-slide="8">
       <div class="s-inner">
-        <span class="s-label">Step 6 — Line detection (LCNN)</span>
+        <span class="s-label">Step 8 — Line detection (LCNN)</span>
 
         <div class="s-visual">
           <img src="images/LCNN_lines.svg" alt="Line segment detection" loading="lazy"/>
@@ -846,10 +821,10 @@
       </div>
     </div>
 
-    <!-- ─── Slide 10 — Height estimation ─── -->
-    <div class="slide" data-slide="10">
+    <!-- ─── Slide 9 — Height estimation ─── -->
+    <div class="slide" data-slide="9">
       <div class="s-inner">
-        <span class="s-label">Step 7 — Height estimation</span>
+        <span class="s-label">Step 9 — Height estimation</span>
 
         <div class="s-visual">
           <img src="images/height_estimation.png" alt="Height estimation" loading="lazy"/>
@@ -861,10 +836,10 @@
       </div>
     </div>
 
-    <!-- ─── Slide 11 — Rectification ─── -->
-    <div class="slide" data-slide="11">
+    <!-- ─── Slide 10 — Rectification ─── -->
+    <div class="slide" data-slide="10">
       <div class="s-inner">
-        <span class="s-label">Step 8 — Rectification</span>
+        <span class="s-label">Step 10 — Rectification</span>
 
         <div class="s-visual">
           <img src="images/rectified_image.png" alt="Rectified fronto-parallel image" loading="lazy"/>
@@ -876,22 +851,22 @@
       </div>
     </div>
 
-    <!-- ─── Slide 12 — Final result ─── -->
-    <div class="slide" data-slide="12">
+    <!-- ─── Slide 11 — Final result ─── -->
+    <div class="slide" data-slide="11">
       <div class="s-inner">
-        <span class="s-label">Step 9 — Result</span>
+        <span class="s-label">Step 11 — Result</span>
 
         <div class="metrics-row">
           <div class="m-card">
-            <span class="m-val">8.4 m</span>
+            <span class="m-val">16.78 m</span>
             <span class="m-lbl">Façade Width</span>
           </div>
           <div class="m-card">
-            <span class="m-val">12.1 m</span>
+            <span class="m-val">17.20 m</span>
             <span class="m-lbl">Façade Height</span>
           </div>
           <div class="m-card">
-            <span class="m-val">101.6 m²</span>
+            <span class="m-val">288.6 m²</span>
             <span class="m-lbl">Total Area</span>
           </div>
         </div>
@@ -902,10 +877,10 @@
       </div>
     </div>
 
-    <!-- ─── Slide 13 — Why it matters ─── -->
-    <div class="slide" data-slide="13">
+    <!-- ─── Slide 12 — Why it matters ─── -->
+    <div class="slide" data-slide="12">
       <div class="s-inner">
-        <span class="s-label">Application</span>
+        <span class="s-label">Step 12 — Application</span>
 
         <div class="gi-diagram">
           <svg viewBox="0 0 800 230" xmlns="http://www.w3.org/2000/svg"
@@ -955,21 +930,21 @@
                   marker-start="url(#aw-l)" marker-end="url(#aw-r)"/>
             <text x="400" y="14" text-anchor="middle"
                   fill="#3fb950" font-family="Inter,sans-serif"
-                  font-size="11" font-weight="500">W = 8.4 m</text>
+                  font-size="11" font-weight="500">W = 16.78 m</text>
 
             <!-- Height arrow -->
             <line x1="638" y1="30" x2="638" y2="205"
                   stroke="#3fb950" stroke-width="1.2"
                   marker-start="url(#ah-u)" marker-end="url(#ah-d)"/>
             <text x="660" y="122" fill="#3fb950" font-family="Inter,sans-serif"
-                  font-size="11" font-weight="500">H = 12.1 m</text>
+                  font-size="11" font-weight="500">H = 17.20 m</text>
 
             <!-- Area badge -->
             <rect x="14" y="88" width="118" height="54" rx="9"
                   fill="rgba(63,185,80,.08)" stroke="rgba(63,185,80,.3)" stroke-width="1"/>
             <text x="73" y="112" text-anchor="middle"
                   fill="#3fb950" font-family="Inter,sans-serif"
-                  font-size="20" font-weight="600">101.6</text>
+                  font-size="20" font-weight="600">288.6</text>
             <text x="73" y="130" text-anchor="middle"
                   fill="#8b949e" font-family="Inter,sans-serif" font-size="11">m² façade area</text>
 
@@ -1045,7 +1020,7 @@
 /* ════════════════════════════════════════════════
    SLIDESHOW CONTROLLER
 ════════════════════════════════════════════════ */
-const TOTAL = 13;
+const TOTAL = 12;
 let cur = 1;
 
 // Build dot buttons
@@ -1070,7 +1045,7 @@ function goTo(n) {
 
   cur = n;
 
-  if (n === 4) initMapDetail();
+  if (n === 3) initMapDetail();
 }
 
 function move(dir) {
