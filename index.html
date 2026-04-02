@@ -584,7 +584,7 @@
   </p>
 
   <div class="hero-buttons">
-    <a href="https://github.com" target="_blank" class="btn btn-primary">
+    <a href="https://github.com/Khansa-Gulshad/FacadeGeometry/tree/main" target="_blank" class="btn btn-primary">
       <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor">
         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
                  0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
@@ -699,29 +699,8 @@
       <div class="s-inner">
         <span class="s-label">Step 4 — Segmentation (Mask2Former)</span>
 
-        <div class="s-visual" style="overflow:hidden;">
-          <div class="seg-wrap">
-            <img src="images/street_view_image.jpg" alt="Façade segmentation" loading="lazy"/>
-            <!-- Approximate façade mask overlay -->
-            <svg class="seg-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <polygon
-                points="28,12 72,12 78,92 22,92"
-                fill="rgba(63,185,80,.38)"
-                stroke="rgba(63,185,80,.9)"
-                stroke-width=".5"/>
-              <!-- pulsing border animation -->
-              <polygon
-                points="28,12 72,12 78,92 22,92"
-                fill="none"
-                stroke="rgba(63,185,80,.6)"
-                stroke-width=".8"
-                stroke-dasharray="4 2">
-                <animate attributeName="stroke-dashoffset"
-                         from="0" to="-12"
-                         dur="1.5s" repeatCount="indefinite"/>
-              </polygon>
-            </svg>
-          </div>
+        <div class="s-visual">
+          <img src="images/segmentation.png" alt="Façade segmentation" loading="lazy"/>
         </div>
 
         <div class="s-caption">
@@ -730,8 +709,23 @@
       </div>
     </div>
 
-    <!-- ─── Slide 6 — Vanishing points ─── -->
+    <!-- ─── Slide 6 — Segmentation overlay ─── -->
     <div class="slide" data-slide="6">
+      <div class="s-inner">
+        <span class="s-label">Step 4b — Segmentation overlay</span>
+
+        <div class="s-visual">
+          <img src="images/segmentation_overlay.jpg" alt="Segmentation mask overlaid on building" loading="lazy"/>
+        </div>
+
+        <div class="s-caption">
+          <p>Segmentation mask overlaid on the original building image</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Slide 7 — Vanishing points ─── -->
+    <div class="slide" data-slide="7">
       <div class="s-inner">
         <span class="s-label">Step 5 — Vanishing points (NeurVPS)</span>
 
@@ -745,13 +739,13 @@
       </div>
     </div>
 
-    <!-- ─── Slide 7 — Line detection ─── -->
-    <div class="slide" data-slide="7">
+    <!-- ─── Slide 8 — Line detection ─── -->
+    <div class="slide" data-slide="8">
       <div class="s-inner">
         <span class="s-label">Step 6 — Line detection (LCNN)</span>
 
         <div class="s-visual">
-          <img src="images/LCNN_lines.png" alt="Line segment detection" loading="lazy"/>
+          <img src="images/LCNN_lines.svg" alt="Line segment detection" loading="lazy"/>
         </div>
 
         <div class="s-caption">
@@ -760,39 +754,13 @@
       </div>
     </div>
 
-    <!-- ─── Slide 8 — Height estimation ─── -->
-    <div class="slide" data-slide="8">
+    <!-- ─── Slide 9 — Height estimation ─── -->
+    <div class="slide" data-slide="9">
       <div class="s-inner">
         <span class="s-label">Step 7 — Height estimation</span>
 
-        <div class="s-visual" style="overflow:hidden;">
-          <div class="ht-wrap">
-            <img src="images/street_view_image.jpg" alt="Height annotation" loading="lazy"/>
-            <svg class="ht-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <defs>
-                <marker id="ah1" markerWidth="4" markerHeight="4" refX="2" refY="2" orient="auto">
-                  <polygon points="0,0 4,2 0,4" fill="#fbbf24"/>
-                </marker>
-                <marker id="ah2" markerWidth="4" markerHeight="4" refX="2" refY="2" orient="auto-start-reverse">
-                  <polygon points="0,0 4,2 0,4" fill="#fbbf24"/>
-                </marker>
-              </defs>
-              <!-- vertical measurement line -->
-              <line x1="20" y1="13" x2="20" y2="91"
-                    stroke="#fbbf24" stroke-width=".6"
-                    stroke-dasharray="2.5 1.2"
-                    marker-start="url(#ah2)" marker-end="url(#ah1)"/>
-              <!-- label pill -->
-              <rect x="2" y="48" width="14" height="5.5" rx="1.2" fill="rgba(0,0,0,.75)"/>
-              <text x="9" y="52.4" text-anchor="middle"
-                    fill="#fbbf24" font-family="Inter,sans-serif"
-                    font-size="3.2" font-weight="600">H≈12 m</text>
-              <!-- top tick -->
-              <line x1="17" y1="13" x2="23" y2="13" stroke="#fbbf24" stroke-width=".6"/>
-              <!-- bottom tick -->
-              <line x1="17" y1="91" x2="23" y2="91" stroke="#fbbf24" stroke-width=".6"/>
-            </svg>
-          </div>
+        <div class="s-visual">
+          <img src="images/height_estimation.png" alt="Height estimation" loading="lazy"/>
         </div>
 
         <div class="s-caption">
@@ -801,8 +769,8 @@
       </div>
     </div>
 
-    <!-- ─── Slide 9 — Rectification ─── -->
-    <div class="slide" data-slide="9">
+    <!-- ─── Slide 10 — Rectification ─── -->
+    <div class="slide" data-slide="10">
       <div class="s-inner">
         <span class="s-label">Step 8 — Rectification</span>
 
@@ -816,8 +784,8 @@
       </div>
     </div>
 
-    <!-- ─── Slide 10 — Final result ─── -->
-    <div class="slide" data-slide="10">
+    <!-- ─── Slide 11 — Final result ─── -->
+    <div class="slide" data-slide="11">
       <div class="s-inner">
         <span class="s-label">Step 9 — Result</span>
 
@@ -842,8 +810,8 @@
       </div>
     </div>
 
-    <!-- ─── Slide 11 — Why it matters ─── -->
-    <div class="slide" data-slide="11">
+    <!-- ─── Slide 12 — Why it matters ─── -->
+    <div class="slide" data-slide="12">
       <div class="s-inner">
         <span class="s-label">Application</span>
 
@@ -949,7 +917,7 @@
 /* ════════════════════════════════════════════════
    SLIDESHOW CONTROLLER
 ════════════════════════════════════════════════ */
-const TOTAL = 11;
+const TOTAL = 12;
 let cur = 1;
 
 // Build dot buttons
