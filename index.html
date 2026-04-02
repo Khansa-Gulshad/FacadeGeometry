@@ -698,11 +698,41 @@
   <div class="ss-wrap">
 
     <div class="ss-counter">
-      <span id="cur">1</span>&thinsp;/&thinsp;11
+      <span id="cur">1</span>&thinsp;/&thinsp;13
     </div>
 
-    <!-- ─── Slide 1 — Intro ─── -->
+    <!-- ─── Slide 1 — Façade image ─── -->
     <div class="slide active" data-slide="1">
+      <div class="s-inner">
+        <span class="s-label">Façade — View 1</span>
+
+        <div class="s-visual">
+          <img src="images/facade.jpg" alt="Façade image" loading="lazy"/>
+        </div>
+
+        <div class="s-caption">
+          <p>Street-view façade used for geometry estimation</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Slide 2 — Façade image 2 ─── -->
+    <div class="slide" data-slide="2">
+      <div class="s-inner">
+        <span class="s-label">Façade — View 2</span>
+
+        <div class="s-visual">
+          <img src="images/facade2.jpg" alt="Façade image 2" loading="lazy"/>
+        </div>
+
+        <div class="s-caption">
+          <p>Alternative façade view</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Slide 3 — Intro ─── -->
+    <div class="slide" data-slide="3">
       <div class="s-inner">
         <span class="s-label">Introduction</span>
 
@@ -726,23 +756,8 @@
       </div>
     </div>
 
-    <!-- ─── Slide 2 — Map context ─── -->
-    <div class="slide" data-slide="2">
-      <div class="s-inner">
-        <span class="s-label">Step 1 — Location</span>
-
-        <div class="s-visual" style="max-height:none; padding:0;">
-          <div id="map-overview" class="map-pane"></div>
-        </div>
-
-        <div class="s-caption">
-          <p>We start by selecting a building in Gdańsk.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- ─── Slide 3 — Selected building ─── -->
-    <div class="slide" data-slide="3">
+    <!-- ─── Slide 4 — Selected building ─── -->
+    <div class="slide" data-slide="4">
       <div class="s-inner">
         <span class="s-label">Step 2 — Building selection</span>
 
@@ -756,8 +771,8 @@
       </div>
     </div>
 
-    <!-- ─── Slide 4 — Street view image ─── -->
-    <div class="slide" data-slide="4">
+    <!-- ─── Slide 5 — Street view image ─── -->
+    <div class="slide" data-slide="5">
       <div class="s-inner">
         <span class="s-label">Step 3 — Input image</span>
 
@@ -771,8 +786,8 @@
       </div>
     </div>
 
-    <!-- ─── Slide 5 — Segmentation ─── -->
-    <div class="slide" data-slide="5">
+    <!-- ─── Slide 6 — Segmentation ─── -->
+    <div class="slide" data-slide="6">
       <div class="s-inner">
         <span class="s-label">Step 4 — Segmentation (Mask2Former)</span>
 
@@ -786,8 +801,8 @@
       </div>
     </div>
 
-    <!-- ─── Slide 6 — Segmentation overlay ─── -->
-    <div class="slide" data-slide="6">
+    <!-- ─── Slide 7 — Segmentation overlay ─── -->
+    <div class="slide" data-slide="7">
       <div class="s-inner">
         <span class="s-label">Step 4b — Segmentation overlay</span>
 
@@ -801,8 +816,8 @@
       </div>
     </div>
 
-    <!-- ─── Slide 7 — Vanishing points ─── -->
-    <div class="slide" data-slide="7">
+    <!-- ─── Slide 8 — Vanishing points ─── -->
+    <div class="slide" data-slide="8">
       <div class="s-inner">
         <span class="s-label">Step 5 — Vanishing points (NeurVPS)</span>
 
@@ -816,8 +831,8 @@
       </div>
     </div>
 
-    <!-- ─── Slide 8 — Line detection ─── -->
-    <div class="slide" data-slide="8">
+    <!-- ─── Slide 9 — Line detection ─── -->
+    <div class="slide" data-slide="9">
       <div class="s-inner">
         <span class="s-label">Step 6 — Line detection (LCNN)</span>
 
@@ -831,8 +846,8 @@
       </div>
     </div>
 
-    <!-- ─── Slide 9 — Height estimation ─── -->
-    <div class="slide" data-slide="9">
+    <!-- ─── Slide 10 — Height estimation ─── -->
+    <div class="slide" data-slide="10">
       <div class="s-inner">
         <span class="s-label">Step 7 — Height estimation</span>
 
@@ -846,8 +861,8 @@
       </div>
     </div>
 
-    <!-- ─── Slide 10 — Rectification ─── -->
-    <div class="slide" data-slide="10">
+    <!-- ─── Slide 11 — Rectification ─── -->
+    <div class="slide" data-slide="11">
       <div class="s-inner">
         <span class="s-label">Step 8 — Rectification</span>
 
@@ -861,8 +876,8 @@
       </div>
     </div>
 
-    <!-- ─── Slide 11 — Final result ─── -->
-    <div class="slide" data-slide="11">
+    <!-- ─── Slide 12 — Final result ─── -->
+    <div class="slide" data-slide="12">
       <div class="s-inner">
         <span class="s-label">Step 9 — Result</span>
 
@@ -887,8 +902,8 @@
       </div>
     </div>
 
-    <!-- ─── Slide 12 — Why it matters ─── -->
-    <div class="slide" data-slide="12">
+    <!-- ─── Slide 13 — Why it matters ─── -->
+    <div class="slide" data-slide="13">
       <div class="s-inner">
         <span class="s-label">Application</span>
 
@@ -1030,7 +1045,7 @@
 /* ════════════════════════════════════════════════
    SLIDESHOW CONTROLLER
 ════════════════════════════════════════════════ */
-const TOTAL = 12;
+const TOTAL = 13;
 let cur = 1;
 
 // Build dot buttons
@@ -1055,8 +1070,7 @@ function goTo(n) {
 
   cur = n;
 
-  if (n === 2) initMapOverview();
-  if (n === 3) initMapDetail();
+  if (n === 4) initMapDetail();
 }
 
 function move(dir) {
