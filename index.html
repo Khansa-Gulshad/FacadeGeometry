@@ -513,6 +513,54 @@
       letter-spacing: .08em;
     }
 
+    /* Pixel-to-area 4-block layout */
+    .px-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .px-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+    }
+
+    .px-block-title {
+      font-size: .7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--accent);
+      padding-bottom: .5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .px-block-main {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .px-block-note {
+      font-size: .78rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .px-block-note .accent { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .px-grid { grid-template-columns: 1fr 1fr; }
+    }
+
     /* Green infrastructure diagram */
     .gi-diagram {
       width: 100%;
@@ -707,7 +755,7 @@
   <div class="ss-wrap">
 
     <div class="ss-counter">
-      <span id="cur">1</span>&thinsp;/&thinsp;12
+      <span id="cur">1</span>&thinsp;/&thinsp;13
     </div>
 
     <!-- ─── Slide 1 — Façade image ─── -->
@@ -860,10 +908,65 @@
       </div>
     </div>
 
-    <!-- ─── Slide 11 — Final result ─── -->
+    <!-- ─── Slide 11 — Pixels to area ─── -->
     <div class="slide" data-slide="11">
       <div class="s-inner">
-        <span class="s-label">Step 11 — Result</span>
+        <span class="s-label">Step 11 — From Pixels to Real-World Area</span>
+
+        <div class="px-grid">
+
+          <!-- Block 1 — Image + Mask -->
+          <div class="px-block">
+            <span class="px-block-title">Image &amp; Mask</span>
+            <div class="px-block-main">Rectified façade<br>+ segmentation mask</div>
+            <div class="px-block-note">
+              <span class="accent">RGB and mask<br>share the same<br>pixel grid</span>
+            </div>
+          </div>
+
+          <!-- Block 2 — Core idea -->
+          <div class="px-block">
+            <span class="px-block-title">Core Idea</span>
+            <div class="px-block-main">Same pixel =<br>same location</div>
+            <div class="px-block-note">
+              RGB → appearance<br>
+              Mask → labels
+            </div>
+          </div>
+
+          <!-- Block 3 — Height scaling -->
+          <div class="px-block">
+            <span class="px-block-title">Height Scaling</span>
+            <div class="px-block-main">Pixel height<br>→ real height</div>
+            <div class="px-block-note">
+              Known height: <span class="accent">15 m</span><br>
+              defines the scale<br><br>
+              <span class="accent">Scale = meters / pixel</span>
+            </div>
+          </div>
+
+          <!-- Block 4 — Area computation -->
+          <div class="px-block">
+            <span class="px-block-title">Area Computation</span>
+            <div class="px-block-main">Count façade pixels</div>
+            <div class="px-block-note">
+              Area = pixels × scale²<br><br>
+              Width = Area / Height
+            </div>
+          </div>
+
+        </div><!-- .px-grid -->
+
+        <div class="s-caption">
+          <p>Pixel counts convert to real-world dimensions via the known building height</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Slide 12 — Final result ─── -->
+    <div class="slide" data-slide="12">
+      <div class="s-inner">
+        <span class="s-label">Step 12 — Result</span>
 
         <div class="metrics-row">
           <div class="m-card">
@@ -886,10 +989,10 @@
       </div>
     </div>
 
-    <!-- ─── Slide 12 — Why it matters ─── -->
-    <div class="slide" data-slide="12">
+    <!-- ─── Slide 13 — Why it matters ─── -->
+    <div class="slide" data-slide="13">
       <div class="s-inner">
-        <span class="s-label">Step 12 — Application</span>
+        <span class="s-label">Step 13 — Application</span>
 
         <div class="gi-diagram">
           <svg viewBox="0 0 800 230" xmlns="http://www.w3.org/2000/svg"
@@ -1029,7 +1132,7 @@
 /* ════════════════════════════════════════════════
    SLIDESHOW CONTROLLER
 ════════════════════════════════════════════════ */
-const TOTAL = 12;
+const TOTAL = 13;
 let cur = 1;
 
 // Build dot buttons
