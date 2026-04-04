@@ -513,10 +513,44 @@
       letter-spacing: .08em;
     }
 
-    /* Pixel-to-area 4-block layout */
+    /* Pixel-to-area layout */
+    .px-images {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .px-img-wrap {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .px-img-wrap img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .px-img-caption {
+      font-size: .7rem;
+      color: var(--muted);
+      text-align: center;
+      padding: .45rem .6rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .px-img-caption .accent { color: var(--accent); }
+
     .px-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 1rem;
       width: 100%;
       max-width: 900px;
@@ -526,24 +560,24 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1.4rem 1.1rem;
+      padding: 1.1rem 1rem;
       display: flex;
       flex-direction: column;
-      gap: .75rem;
+      gap: .6rem;
     }
 
     .px-block-title {
-      font-size: .7rem;
+      font-size: .68rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: .1em;
       color: var(--accent);
-      padding-bottom: .5rem;
+      padding-bottom: .45rem;
       border-bottom: 1px solid var(--border);
     }
 
     .px-block-main {
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 600;
       color: var(--text);
       line-height: 1.5;
@@ -552,13 +586,14 @@
     .px-block-note {
       font-size: .78rem;
       color: var(--muted);
-      line-height: 1.45;
+      line-height: 1.5;
     }
 
     .px-block-note .accent { color: var(--accent); }
 
     @media (max-width: 600px) {
-      .px-grid { grid-template-columns: 1fr 1fr; }
+      .px-images { grid-template-columns: 1fr; }
+      .px-grid    { grid-template-columns: 1fr; }
     }
 
     /* Green infrastructure diagram */
@@ -913,28 +948,31 @@
       <div class="s-inner">
         <span class="s-label">Step 11 — From Pixels to Real-World Area</span>
 
+        <!-- Row 1 — Side-by-side images -->
+        <div class="px-images">
+          <div class="px-img-wrap">
+            <img src="images/rectified_image.png" alt="Rectified façade image" loading="lazy"/>
+            <div class="px-img-caption">Rectified façade — <span class="accent">RGB</span></div>
+          </div>
+          <div class="px-img-wrap">
+            <img src="images/rectified_mask.png" alt="Rectified segmentation mask" loading="lazy"/>
+            <div class="px-img-caption">Segmentation mask — <span class="accent">labels</span></div>
+          </div>
+        </div>
+
+        <!-- Row 2 — Three info blocks -->
         <div class="px-grid">
 
-          <!-- Block 1 — Image + Mask -->
-          <div class="px-block">
-            <span class="px-block-title">Image &amp; Mask</span>
-            <div class="px-block-main">Rectified façade<br>+ segmentation mask</div>
-            <div class="px-block-note">
-              <span class="accent">RGB and mask<br>share the same<br>pixel grid</span>
-            </div>
-          </div>
-
-          <!-- Block 2 — Core idea -->
           <div class="px-block">
             <span class="px-block-title">Core Idea</span>
             <div class="px-block-main">Same pixel =<br>same location</div>
             <div class="px-block-note">
               RGB → appearance<br>
-              Mask → labels
+              Mask → labels<br><br>
+              Both share the same pixel grid
             </div>
           </div>
 
-          <!-- Block 3 — Height scaling -->
           <div class="px-block">
             <span class="px-block-title">Height Scaling</span>
             <div class="px-block-main">Pixel height<br>→ real height</div>
@@ -945,7 +983,6 @@
             </div>
           </div>
 
-          <!-- Block 4 — Area computation -->
           <div class="px-block">
             <span class="px-block-title">Area Computation</span>
             <div class="px-block-main">Count façade pixels</div>
