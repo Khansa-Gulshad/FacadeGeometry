@@ -532,26 +532,20 @@
     }
 
     .px-img-wrap .px-viewport {
-      overflow: hidden;
-      height: 260px;
-      position: relative;
+      height: 280px;
+      overflow-y: scroll;
+      overflow-x: hidden;
     }
 
     .px-img-wrap img {
       width: 100%;
-      height: 260px;
-      object-fit: cover;
-      object-position: center 0%;
+      height: auto;
       display: block;
-      transition: object-position .05s linear;
     }
 
     .px-img-footer {
       border-top: 1px solid var(--border);
       padding: .35rem .7rem .45rem;
-      display: flex;
-      flex-direction: column;
-      gap: .3rem;
     }
 
     .px-img-caption {
@@ -561,44 +555,6 @@
     }
 
     .px-img-caption .accent { color: var(--accent); }
-
-    /* Pan slider */
-    .px-pan-slider {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 3px;
-      border-radius: 2px;
-      background: var(--border);
-      outline: none;
-      cursor: ew-resize;
-    }
-
-    .px-pan-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: grab;
-    }
-
-    .px-pan-slider::-moz-range-thumb {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: var(--accent);
-      border: none;
-      cursor: grab;
-    }
-
-    .px-pan-label {
-      font-size: .62rem;
-      color: var(--muted);
-      text-align: center;
-      letter-spacing: .06em;
-    }
 
     .px-grid {
       display: grid;
@@ -1004,24 +960,18 @@
         <div class="px-images">
           <div class="px-img-wrap">
             <div class="px-viewport">
-              <img id="px-img-rgb" src="images/rectified_image.png" alt="Rectified façade image" loading="lazy"/>
+              <img src="images/rectified_image.png" alt="Rectified façade image" loading="lazy"/>
             </div>
             <div class="px-img-footer">
               <div class="px-img-caption">Rectified façade — <span class="accent">RGB</span></div>
-              <input class="px-pan-slider" type="range" min="0" max="100" value="0"
-                     oninput="document.getElementById('px-img-rgb').style.objectPosition='center '+this.value+'%'"/>
-              <div class="px-pan-label">drag to pan</div>
             </div>
           </div>
           <div class="px-img-wrap">
             <div class="px-viewport">
-              <img id="px-img-mask" src="images/rectified_mask.png" alt="Rectified segmentation mask" loading="lazy"/>
+              <img src="images/rectified_mask.png" alt="Rectified segmentation mask" loading="lazy"/>
             </div>
             <div class="px-img-footer">
               <div class="px-img-caption">Segmentation mask — <span class="accent">labels</span></div>
-              <input class="px-pan-slider" type="range" min="0" max="100" value="0"
-                     oninput="document.getElementById('px-img-mask').style.objectPosition='center '+this.value+'%'"/>
-              <div class="px-pan-label">drag to pan</div>
             </div>
           </div>
         </div>
